@@ -1,4 +1,5 @@
-import 'package:eventify/Screens/register_screen.dart';
+// import 'package:eventify/Screens/register_screen.dart';
+import 'package:eventify/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const Registerscreen()
+      home: const LoginScreen()
     );
   }
 }
