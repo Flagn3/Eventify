@@ -30,6 +30,7 @@ class PasswordWidgetState extends State<PasswordWidget> {
       obscureText: _obscureText,
       decoration: InputDecoration(
         prefixIcon: Icon(Icons.lock),
+        border: InputBorder.none,
         hintText: widget.hintText,
         filled: true,
         fillColor: Colors.white,
@@ -63,6 +64,7 @@ class FieldWidget extends StatelessWidget {
         hintText: _hintText,
         filled: true,
         fillColor: Colors.white,
+        border: InputBorder.none
       ),
     );
   }

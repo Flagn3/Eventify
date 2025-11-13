@@ -1,3 +1,5 @@
+import 'package:eventify/screens/register_screen.dart';
+import 'package:eventify/widgets/screens/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -65,34 +67,28 @@ class _LoginScreenState extends State<LoginScreen> {
 
               // Email
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Email',
-                    border: InputBorder.none,
+                child: FieldWidget(
+                  hintText: 'Email'
                   ),
-                ),
               ),
               const SizedBox(height: 20),
 
               // Contraseña
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const TextField(
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    hintText: 'Contraseña',
-                    border: InputBorder.none,
+                child: PasswordWidget(
+                  hintText: 'Contraseña', 
+                  obscureText: true
                   ),
-                ),
               ),
               const SizedBox(height: 40),
 
@@ -133,7 +129,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
               // Botón para ir a registro
               OutlinedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const Registerscreen()));
+                },
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Color(0xFF33BE86), width: 2),
                   shape: RoundedRectangleBorder(
