@@ -1,5 +1,5 @@
 import 'package:eventify/screens/register_screen.dart';
-import 'package:eventify/widgets/screens/widgets.dart';
+import 'package:eventify/widgets/screens/text_and_password_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -73,7 +73,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: FieldWidget(
-                  hintText: 'Email'
+                  hintText: 'Email',
+                  prefixIcon: Icon(Icons.email),
                   ),
               ),
               const SizedBox(height: 20),
@@ -81,10 +82,6 @@ class _LoginScreenState extends State<LoginScreen> {
               // Contraseña
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                ),
                 child: PasswordWidget(
                   hintText: 'Contraseña', 
                   obscureText: true
