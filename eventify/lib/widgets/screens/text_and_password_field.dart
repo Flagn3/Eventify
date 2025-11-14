@@ -30,7 +30,10 @@ class PasswordWidgetState extends State<PasswordWidget> {
       obscureText: _obscureText,
       decoration: InputDecoration(
         prefixIcon: Icon(Icons.lock),
-        border: InputBorder.none,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none
+        ),
         hintText: widget.hintText,
         filled: true,
         fillColor: Colors.white,
@@ -51,20 +54,25 @@ class FieldWidget extends StatelessWidget {
   const FieldWidget({
     super.key,
     required String hintText,
-  }) : _hintText = hintText;
+    required Icon prefixIcon
+  }) : _hintText = hintText, _prefixIcon = prefixIcon;
 
   final String _hintText;
+  final Icon _prefixIcon;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
-        prefixIcon: Icon(Icons.mail),
+        prefixIcon: _prefixIcon,
         hintText: _hintText,
         filled: true,
         fillColor: Colors.white,
-        border: InputBorder.none
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none
+        ),
       ),
     );
   }
