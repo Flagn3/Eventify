@@ -1,9 +1,20 @@
-import 'package:eventify/screens/admin_screen.dart';
-//import 'package:eventify/screens/login_screen.dart';
+
+// import 'package:eventify/Screens/register_screen.dart';
+import 'package:eventify/providers/user_provider.dart';
+import 'package:eventify/screens/login_screen.dart';
+import 'package:eventify/services/user_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider(UserService())),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -13,7 +24,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const AdminScreen()
+      home: const LoginScreen(),
     );
   }
 }

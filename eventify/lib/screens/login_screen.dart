@@ -1,7 +1,11 @@
+import 'package:eventify/providers/user_provider.dart';
+import 'package:eventify/screens/admin_screen.dart';
 import 'package:eventify/screens/register_screen.dart';
+import 'package:eventify/screens/test_screen.dart';
 import 'package:eventify/widgets/screens/text_and_password_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,17 +15,20 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     // Lockear orientación vertical
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   }
 
   @override
   void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
     // Permitir rotación nuevamente al salir de esta pantalla
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -75,7 +82,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: FieldWidget(
                   hintText: 'Email',
                   prefixIcon: Icon(Icons.email),
-                  ),
+                  controller: emailController, //controller
+                ),
               ),
               const SizedBox(height: 20),
 
@@ -83,9 +91,10 @@ class _LoginScreenState extends State<LoginScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
                 child: PasswordWidget(
-                  hintText: 'Contraseña', 
-                  obscureText: true
-                  ),
+                  hintText: 'Contraseña',
+                  obscureText: true,
+                  controller: passwordController, //controller
+                ),
               ),
               const SizedBox(height: 40),
 
@@ -93,7 +102,39 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  //onPressed
+                  onPressed: () async {
+                    final userProvider = context.read<UserProvider>();
+                    await userProvider.login(
+                      emailController.text,
+                      passwordController.text,
+                    );
+
+                    final user = userProvider.activeUser;
+
+                    if (user != null) {
+                      if (user.role == 'u' || user.role == 'o') {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                TestScreen(), //screen vacia de momento
+                          ),
+                        );
+                      } else if (user.role == 'a') {
+                        //redirect a admin view
+                        print('admin redirect');
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => AdminScreen(),
+                          ),
+                        );
+                      }
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(userProvider.errorMessage!)),
+                      );
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF33BE86),
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -127,7 +168,12 @@ class _LoginScreenState extends State<LoginScreen> {
               // Botón para ir a registro
               OutlinedButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const Registerscreen()));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Registerscreen(),
+                    ),
+                  );
                 },
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Color(0xFF33BE86), width: 2),
