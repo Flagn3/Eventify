@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:eventify/models/auth_response.dart';
+import 'package:eventify/models/users_response.dart';
 import 'package:http/http.dart' as http;
 
 class UserService {
@@ -18,14 +19,17 @@ class UserService {
 
     final response = await http.post(
       url,
-      body: {
+      body: json.encode({
         'name': name,
         'email': email,
         'password': password,
         'c_password': confirmPassword,
         'role': role,
+      }),
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
       },
-      headers: {'Accept': 'application/json'}
     );
 
     final authResponse = AuthResponse.fromJson(json.decode(response.body));
@@ -39,8 +43,11 @@ class UserService {
 
     final response = await http.post(
       url,
-      body: {'email': email, 'password': password},
-      headers: {'Accept': 'application/json'},
+      body: json.encode({'email': email, 'password': password}),
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
     );
 
     final authResponse = AuthResponse.fromJson(json.decode(response.body));
@@ -54,8 +61,12 @@ class UserService {
 
     final response = await http.post(
       url,
-      body: {'id': id},
-      headers: {'Accept': 'application/json', 'Authorization': 'Bearer $token'},
+      body: json.encode({'id': id}),
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
     );
 
     final authResponse = AuthResponse.fromJson(json.decode(response.body));
@@ -68,8 +79,12 @@ class UserService {
 
     final response = await http.post(
       url,
-      body: {'id': id},
-      headers: {'Accept': 'application/json', 'Authorization': 'Bearer $token'},
+      body: json.encode({'id': id}),
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
     );
 
     final authResponse = AuthResponse.fromJson(json.decode(response.body));
@@ -77,7 +92,8 @@ class UserService {
   }
 
   // /users
-  Future<AuthResponse> getUsers(String token) async {
+  // changed response type
+  Future<UsersResponse> getUsers(String token) async {
     Uri url = Uri.parse('$_baseUrl/users');
 
     final response = await http.get(
@@ -85,8 +101,8 @@ class UserService {
       headers: {'Accept': 'application/json', 'Authorization': 'Bearer $token'},
     );
 
-    final authResponse = AuthResponse.fromJson(json.decode(response.body));
-    return authResponse;
+    final usersResponse = UsersResponse.fromJson(json.decode(response.body));
+    return usersResponse;
   }
 
   // /deleteUser
@@ -95,8 +111,12 @@ class UserService {
 
     final response = await http.post(
       url,
-      body: {'id': id},
-      headers: {'Accept': 'application/json', 'Authorization': 'Bearer $token'},
+      body: json.encode({'id': id}),
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
     );
 
     final authResponse = AuthResponse.fromJson(json.decode(response.body));
@@ -109,8 +129,12 @@ class UserService {
 
     final response = await http.post(
       url,
-      body: {'id': id, 'name': name},
-      headers: {'Accept': 'application/json', 'Authorization': 'Bearer $token'},
+      body: json.encode({'id': id, 'name': name}),
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
     );
 
     final authResponse = AuthResponse.fromJson(json.decode(response.body));

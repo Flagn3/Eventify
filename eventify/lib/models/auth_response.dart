@@ -6,13 +6,12 @@ class AuthResponse {
   AuthResponse({
     required this.success,
     required this.data,
-    required this.message
+    required this.message,
   });
 
-      factory AuthResponse.fromJson(Map<String, dynamic> json) => AuthResponse(
-        success: json["success"],
-        data: Map<String, dynamic>.from(json["data"]),
-        message: json["message"],
-    );
-
+  factory AuthResponse.fromJson(Map<String, dynamic> json) => AuthResponse(
+    success: json["success"],
+    data: Map<String, dynamic>.from(json["data"]),
+    message: json["message"],
+  );
 }
