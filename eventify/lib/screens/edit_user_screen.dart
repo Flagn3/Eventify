@@ -66,10 +66,11 @@ class _EditUserScreenState extends State<EditUserScreen> {
                       await userProvider.updateUser(
                           widget.user.id, nameController.text.trim()
                       );
+                      
+                      await userProvider.getUsers();
 
                       if (userProvider.errorMessage == null) {
-                        // Éxito: recargamos lista y volvemos
-                        await userProvider.getUsers();
+                        
                         Navigator.pop(context);
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
