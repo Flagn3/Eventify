@@ -58,7 +58,15 @@ class _AdminScreenState extends State<AdminScreen> {
           final user = usersList[index];
           return ListTile(
             title: Text(user.name),
-            subtitle: Text(user.email!),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(user.email!),
+                Text(
+                  user.role == 'u' ? 'Usuario' : 'Organizador',
+                )
+              ],
+            ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [

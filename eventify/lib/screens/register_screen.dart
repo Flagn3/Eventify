@@ -1,7 +1,9 @@
+import 'package:eventify/providers/user_provider.dart';
 import 'package:eventify/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:eventify/widgets/screens/text_and_password_field.dart';
 import 'package:eventify/widgets/screens/login_screen_button.dart';
+import 'package:provider/provider.dart';
 
 class Registerscreen extends StatefulWidget {
   const Registerscreen({super.key});
@@ -12,12 +14,18 @@ class Registerscreen extends StatefulWidget {
 
 class _RegisterscreenState extends State<Registerscreen> {
 
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
 
     final textFieldWidth = MediaQuery.of(context).size.width*0.8;
     String dropdownValue = 'Usuario';
+    final userProvider = Provider.of<UserProvider>(context);
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -65,7 +73,8 @@ class _RegisterscreenState extends State<Registerscreen> {
                         width: textFieldWidth,
                         child: FieldWidget(
                           hintText: "Nombre", 
-                          prefixIcon: Icon(Icons.person)
+                          prefixIcon: Icon(Icons.person),
+                          controller: nameController,
                         )
                       )
                     ),
@@ -77,7 +86,8 @@ class _RegisterscreenState extends State<Registerscreen> {
                         width: textFieldWidth,
                         child: FieldWidget(
                           hintText: "Email", 
-                          prefixIcon: Icon(Icons.email)
+                          prefixIcon: Icon(Icons.email),
+                          controller: emailController,
                         )
                       )
                     ),
@@ -89,7 +99,9 @@ class _RegisterscreenState extends State<Registerscreen> {
                         width: textFieldWidth,
                         child: PasswordWidget(
                           hintText: "Contraseña", 
-                          obscureText: true,)
+                          obscureText: true,
+                          controller: passwordController,
+                        )
                       )
                     ),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.03),
@@ -101,7 +113,8 @@ class _RegisterscreenState extends State<Registerscreen> {
                         child: PasswordWidget(
                           hintText: "Confirmar contraseña", 
                           obscureText: true,
-                          )
+                          controller: confirmPasswordController,
+                        )
                       )
                     ),
 
@@ -142,7 +155,33 @@ class _RegisterscreenState extends State<Registerscreen> {
                     Center(
                       child: SizedBox(
                         width: textFieldWidth,
-                        child: RegisterButton(text: 'Registrarse'),
+                        child: RegisterButton(
+                          text: 'Registrarse',
+                          onPressed: () async {
+                            String role = dropdownValue == 'Usuario' ? 'u' : 'o';
+
+                            await userProvider.register(
+                              nameController.text.trim(), 
+                              emailController.text.trim(), 
+                              passwordController.text.trim(), 
+                              confirmPasswordController.text.trim(), 
+                              role
+                            );
+
+                            if(userProvider.errorMessage==null){
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Registro exitoso. Revisa tu email para confirmar la cuenta.'))
+                              );
+                            } else{
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(userProvider.errorMessage!))
+                              );
+                            }
+
+
+
+                          },
+                        ),
                       ),
                     )
                   ],
@@ -154,4 +193,14 @@ class _RegisterscreenState extends State<Registerscreen> {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
+
 }
