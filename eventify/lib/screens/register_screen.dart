@@ -178,8 +178,6 @@ class _RegisterscreenState extends State<Registerscreen> {
                               );
                             }
 
-
-
                           },
                         ),
                       ),
