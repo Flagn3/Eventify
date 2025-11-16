@@ -3,15 +3,17 @@ import 'package:flutter/material.dart';
 class RegisterButton extends StatelessWidget {
   const RegisterButton({
     super.key,
-    required String text
-  }): _text = text;
+    required String text,
+    required this.onPressed,
+  }) : _text = text;
 
   final String _text;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: onPressed,   // ← ahora usa el callback recibido
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF33BE86),
         padding: const EdgeInsets.symmetric(vertical: 16),

@@ -1,4 +1,5 @@
 import 'package:eventify/models/user.dart';
+import 'package:eventify/screens/edit_user_screen.dart';
 import 'package:eventify/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:eventify/providers/user_provider.dart';
@@ -58,7 +59,15 @@ class _AdminScreenState extends State<AdminScreen> {
           final user = usersList[index];
           return ListTile(
             title: Text(user.name),
-            subtitle: Text(user.email!),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(user.email!),
+                Text(
+                  user.role == 'u' ? 'Usuario' : 'Organizador',
+                )
+              ],
+            ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -71,9 +80,12 @@ class _AdminScreenState extends State<AdminScreen> {
                 // ),
                 ActivateDesactivateWidget(user: user),
                 IconButton(onPressed: () async {
-                  //Ir a formulario para editar
-                    // await userProvider.updateUser(user.id, 'Pepe');
-                    // await userProvider.getUsers();
+                  Navigator.push(
+                    context, 
+                    MaterialPageRoute(
+                      builder: (context) => EditUserScreen(user: user)
+                    )
+                  );
                 }, icon: Icon(Icons.edit)),
                 IconButton(onPressed: () async {
                   await userProvider.deleteUser(user.id);
