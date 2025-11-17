@@ -4,6 +4,8 @@ import 'package:eventify/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:eventify/providers/user_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+
 
 class AdminScreen extends StatefulWidget {
   const AdminScreen({super.key});
@@ -57,43 +59,99 @@ class _AdminScreenState extends State<AdminScreen> {
         itemCount: usersList.length,
         itemBuilder: (BuildContext context, int index) {
           final user = usersList[index];
-          return ListTile(
+          return Slidable(
+            key: ValueKey(user.id),
+
+          // --- ACCIONES IZQUIERDA (activar/desactivar y editar) ---
+          startActionPane: ActionPane(
+            motion: ScrollMotion(),
+            children: [
+
+              // Activar / Desactivar
+              SlidableAction(
+                onPressed: (context) async {
+                  await userProvider.editActivation(user.id, user.actived!);
+                  setState(() {
+                    user.actived = !user.actived!;
+                  });
+                },
+                backgroundColor: user.actived! ? Colors.red : Colors.green,
+                foregroundColor: Colors.white,
+                icon: user.actived! ? Icons.toggle_off : Icons.toggle_on,
+                label: user.actived! ? "Desactivar" : "Activar",
+              ),
+
+              // Editar
+              SlidableAction(
+                onPressed: (context) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditUserScreen(user: user),
+                    ),
+                  );
+                },
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                icon: Icons.edit,
+                label: "Editar",
+              ),
+            ],
+          ),
+
+          // --- ACCIÓN DERECHA (eliminar) ---
+          endActionPane: ActionPane(
+            motion: ScrollMotion(),
+            children: [
+              SlidableAction(
+                onPressed: (context) async {
+                  // Mostrar confirmación
+                  final confirm = await showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text("Confirmar eliminación"),
+                      content: Text("¿Deseas eliminar este usuario?"),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: Text("Cancelar"),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            await userProvider.deleteUser(user.id);
+                            Navigator.pop(context, true);
+                          },
+                          child: Text("Eliminar", style: TextStyle(color: Colors.red)),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (confirm == true) {
+                    await userProvider.deleteUser(user.id);
+                    await userProvider.getUsers();
+                  }
+                },
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                icon: Icons.delete,
+                label: "Eliminar",
+              ),
+            ],
+          ),
+
+          // List Tile 
+          child: ListTile(
             title: Text(user.name),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(user.email!),
-                Text(
-                  user.role == 'u' ? 'Usuario' : 'Organizador',
-                )
+                Text(user.email ?? ""),
+                Text(user.role == 'u' ? 'Usuario' : 'Organizador'),
               ],
             ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Tooltip(
-                //   message: "Activar usuario",
-                //   child: IconButton(
-                //   onPressed: (){},
-                //   icon: Icon(Icons.toggle_on)
-                // ),
-                // ),
-                ActivateDesactivateWidget(user: user),
-                IconButton(onPressed: () async {
-                  Navigator.push(
-                    context, 
-                    MaterialPageRoute(
-                      builder: (context) => EditUserScreen(user: user)
-                    )
-                  );
-                }, icon: Icon(Icons.edit)),
-                IconButton(onPressed: () async {
-                  await userProvider.deleteUser(user.id);
-                  await userProvider.getUsers();
-                }, icon: Icon(Icons.delete)),
-              ],
-            ),
-          );
+          ),
+        );
         },
         separatorBuilder: (BuildContext context, int index) {
           return Divider();

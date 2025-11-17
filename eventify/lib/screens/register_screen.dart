@@ -18,12 +18,12 @@ class _RegisterscreenState extends State<Registerscreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
+  String dropdownValue = 'Usuario';
 
   @override
   Widget build(BuildContext context) {
 
     final textFieldWidth = MediaQuery.of(context).size.width*0.8;
-    String dropdownValue = 'Usuario';
     final userProvider = Provider.of<UserProvider>(context);
 
     return Scaffold(
@@ -125,7 +125,7 @@ class _RegisterscreenState extends State<Registerscreen> {
                       child: SizedBox(
                         width: textFieldWidth,
                         child: DropdownButtonFormField<String>(
-                          initialValue: dropdownValue,
+                          value: dropdownValue,
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: Colors.white,
@@ -158,6 +158,7 @@ class _RegisterscreenState extends State<Registerscreen> {
                         child: RegisterButton(
                           text: 'Registrarse',
                           onPressed: () async {
+
                             String role = dropdownValue == 'Usuario' ? 'u' : 'o';
 
                             await userProvider.register(
@@ -172,12 +173,13 @@ class _RegisterscreenState extends State<Registerscreen> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text('Registro exitoso. Revisa tu email para confirmar la cuenta.'))
                               );
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
                             } else{
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text(userProvider.errorMessage!))
                               );
                             }
-
+                            
                           },
                         ),
                       ),
