@@ -25,6 +25,7 @@ class _AdminScreenState extends State<AdminScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final parentContext = context;
     final userProvider = context.watch<UserProvider>();
     List<User> usersList = userProvider.userList;
 
@@ -62,26 +63,36 @@ class _AdminScreenState extends State<AdminScreen> {
           return Slidable(
             key: ValueKey(user.id),
 
-          // --- ACCIONES IZQUIERDA (activar/desactivar y editar) ---
+          
           startActionPane: ActionPane(
             motion: ScrollMotion(),
             children: [
 
-              // Activar / Desactivar
+              // Activate / Deactivate
               SlidableAction(
-                onPressed: (context) async {
+                onPressed: (_) async {
                   await userProvider.editActivation(user.id, user.actived!);
                   setState(() {
                     user.actived = !user.actived!;
                   });
+                  ScaffoldMessenger.of(parentContext).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        user.actived! ? 'Usuario activado con éxito' : 'Usuario desactivado con éxito',
+                      ),
+                      backgroundColor: Colors.green,
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
                 },
+                
                 backgroundColor: user.actived! ? Colors.red : Colors.green,
                 foregroundColor: Colors.white,
                 icon: user.actived! ? Icons.toggle_off : Icons.toggle_on,
                 label: user.actived! ? "Desactivar" : "Activar",
               ),
 
-              // Editar
+              // Edit
               SlidableAction(
                 onPressed: (context) {
                   Navigator.push(
@@ -99,13 +110,13 @@ class _AdminScreenState extends State<AdminScreen> {
             ],
           ),
 
-          // --- ACCIÓN DERECHA (eliminar) ---
+          // Delete
           endActionPane: ActionPane(
             motion: ScrollMotion(),
             children: [
               SlidableAction(
                 onPressed: (context) async {
-                  // Mostrar confirmación
+                  // show confirmation
                   final confirm = await showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
@@ -118,7 +129,6 @@ class _AdminScreenState extends State<AdminScreen> {
                         ),
                         TextButton(
                           onPressed: () async {
-                            await userProvider.deleteUser(user.id);
                             Navigator.pop(context, true);
                           },
                           child: Text("Eliminar", style: TextStyle(color: Colors.red)),
@@ -130,6 +140,12 @@ class _AdminScreenState extends State<AdminScreen> {
                   if (confirm == true) {
                     await userProvider.deleteUser(user.id);
                     await userProvider.getUsers();
+                    ScaffoldMessenger.of(parentContext).showSnackBar(
+                      SnackBar(content: Text('Usuario eliminado con éxito'),
+                      backgroundColor: Colors.green,
+                      duration: Duration(seconds: 2),
+                      )
+                    );
                   }
                 },
                 backgroundColor: Colors.red,
@@ -150,6 +166,15 @@ class _AdminScreenState extends State<AdminScreen> {
                 Text(user.role == 'u' ? 'Usuario' : 'Organizador'),
               ],
             ),
+            trailing: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.2,
+              child: Text(user.actived == true ? 'Activado' : 'Desactivado', 
+                style: TextStyle(
+                  color: user.actived == true ? const Color.fromARGB(255, 0, 255, 8) : const Color.fromARGB(255, 255, 17, 0),
+                  fontWeight: FontWeight.bold
+                ),
+              ),
+            ),
           ),
         );
         },
@@ -161,37 +186,4 @@ class _AdminScreenState extends State<AdminScreen> {
   }
 }
 
-class ActivateDesactivateWidget extends StatefulWidget {
-  final User user;
 
-  const ActivateDesactivateWidget({super.key, required this.user});
-
-  @override
-  _ActivateDesactivateWidgetState createState() =>
-      _ActivateDesactivateWidgetState();
-}
-
-class _ActivateDesactivateWidgetState extends State<ActivateDesactivateWidget> {
-  @override
-  Widget build(BuildContext context) {
-    final userProvider = context.read<UserProvider>();
-
-    return TextButton(
-      onPressed: () async {
-        await userProvider.editActivation(widget.user.id, widget.user.actived!);
-        setState(() {
-          widget.user.actived =
-              !widget.user.actived!; // alterna entre activado / desactivado
-        });
-      },
-      child: Text(
-        widget.user.actived! ? "Desactivar" : "Activar",
-        style: TextStyle(
-          color: widget.user.actived!
-              ? const Color.fromARGB(255, 255, 17, 0)
-              : const Color.fromARGB(255, 0, 255, 8),
-        ),
-      ),
-    );
-  }
-}
