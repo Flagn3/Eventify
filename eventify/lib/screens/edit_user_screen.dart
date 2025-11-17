@@ -72,6 +72,13 @@ class _EditUserScreenState extends State<EditUserScreen> {
                       if (userProvider.errorMessage == null) {
                         
                         Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Usuario editado con éxito') ,
+                            backgroundColor: Colors.green,
+                            duration: Duration(seconds: 2),
+                          )
+                        );
+
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(

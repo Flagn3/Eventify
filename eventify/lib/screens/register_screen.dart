@@ -171,7 +171,10 @@ class _RegisterscreenState extends State<Registerscreen> {
 
                             if(userProvider.errorMessage==null){
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Registro exitoso. Revisa tu email para confirmar la cuenta.'))
+                                SnackBar(content: Text('Registro exitoso. Revisa tu email para confirmar la cuenta.'),
+                                  backgroundColor: Colors.green,
+                                  duration: Duration(seconds: 2),
+                                )
                               );
                               Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
                             } else{
