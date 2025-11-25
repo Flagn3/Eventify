@@ -5,7 +5,7 @@ class Event{
   int? organizerId;
   String title;
   String? description;
-  String categoryId;
+  String category;
   DateTime startTime;
   DateTime endTime;
   String location;
@@ -25,7 +25,7 @@ class Event{
     required this.startTime,
     required this.endTime,
     required this.imageUrl,
-    required this.categoryId,
+    required this.category,
     required this.location,
     required this.latitude,
     required this.longitude,
@@ -40,11 +40,10 @@ class Event{
     startTime: json['start_time'],
     endTime: json['end_time'],
     imageUrl: json['image_url'],
-    categoryId: json['category'],
+    category: json['category'],
     location: json['location'],
     latitude: json['latitude'],
     longitude: json['longitude']
-    
   );
 
 }
