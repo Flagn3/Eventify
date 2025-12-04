@@ -50,6 +50,7 @@ class EventProvider extends ChangeNotifier {
     await getAllEvents();
     final now = DateTime.now();
     events = events.where((e) => e.startTime.isAfter(now)).toList();
+    ordeByDate();
     notifyListeners();
   }
 
@@ -57,6 +58,7 @@ class EventProvider extends ChangeNotifier {
   Future<void> getEventsByCategory(String categoryName) async {
     await getAllEvents();
     events = events.where((e) => e.category == categoryName).toList();
+    ordeByDate();
     notifyListeners();
   }
 
@@ -67,7 +69,12 @@ class EventProvider extends ChangeNotifier {
     events = events
       .where((e) => e.category == categoryName && e.startTime.isAfter(now))
         .toList();
+    ordeByDate();
     notifyListeners();
+  }
+
+  void ordeByDate (){
+    events.sort((a, b) => a.startTime.compareTo(b.startTime));
   }
 
 }
