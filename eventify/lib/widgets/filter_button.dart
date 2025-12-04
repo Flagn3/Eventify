@@ -3,7 +3,7 @@ import 'package:eventify/providers/event_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
-import 'category_button.dart';  // tu widget de botones de categoría
+import 'category_button.dart';
 
 class FilterButton extends StatelessWidget {
   const FilterButton({super.key});
