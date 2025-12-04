@@ -1,6 +1,6 @@
 import 'package:eventify/models/user.dart';
-import 'package:eventify/screens/edit_user_screen.dart';
-import 'package:eventify/screens/login_screen.dart';
+import 'package:eventify/screens/admin/edit_user_screen.dart';
+import 'package:eventify/screens/login/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:eventify/providers/user_provider.dart';
 import 'package:provider/provider.dart';

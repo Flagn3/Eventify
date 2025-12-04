@@ -1,7 +1,8 @@
 import 'package:eventify/providers/user_provider.dart';
-import 'package:eventify/screens/admin_screen.dart';
-import 'package:eventify/screens/register_screen.dart';
-import 'package:eventify/screens/test_screen.dart';
+import 'package:eventify/screens/admin/admin_screen.dart';
+import 'package:eventify/screens/login/register_screen.dart';
+// import 'package:eventify/screens/test_screen.dart';
+import 'package:eventify/screens/user/user_screen.dart';
 import 'package:eventify/widgets/screens/text_and_password_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -117,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Navigator.of(context).pushReplacement(
                           MaterialPageRoute(
                             builder: (context) =>
-                                TestScreen(), //screen vacia de momento
+                                UserScreen(), //screen vacia de momento
                           ),
                         );
                       } else if (user.role == 'a') {

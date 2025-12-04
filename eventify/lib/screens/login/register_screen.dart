@@ -1,5 +1,5 @@
 import 'package:eventify/providers/user_provider.dart';
-import 'package:eventify/screens/login_screen.dart';
+import 'package:eventify/screens/login/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:eventify/widgets/screens/text_and_password_field.dart';
 import 'package:eventify/widgets/screens/login_screen_button.dart';
