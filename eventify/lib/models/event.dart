@@ -1,4 +1,3 @@
-import 'dart:ffi';
 
 class Event{
   int id;
@@ -9,10 +8,10 @@ class Event{
   DateTime startTime;
   DateTime endTime;
   String location;
-  Float latitude;
-  Float longitude;
+  double? latitude;
+  double? longitude;
   int? maxAttendees;
-  Float? price;
+  double? price;
   String imageUrl;
   bool? deleted;
 
@@ -37,8 +36,8 @@ class Event{
   factory Event.fromEventsJson (Map<String, dynamic> json) => Event(
     id: json['id'],
     title: json['title'],
-    startTime: json['start_time'],
-    endTime: json['end_time'],
+    startTime: DateTime.parse(json['start_time']),
+    endTime: DateTime.parse(json['end_time']),
     imageUrl: json['image_url'],
     category: json['category'],
     location: json['location'],
