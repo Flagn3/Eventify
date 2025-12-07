@@ -12,6 +12,7 @@ class EventProvider extends ChangeNotifier {
   List<Event> events = [];
   bool isLoading = false;
   String? errorMessage;
+  String? activeCategory;
 
   EventProvider(this.userProvider);
 
@@ -47,6 +48,7 @@ class EventProvider extends ChangeNotifier {
 
   //List events by dateTime
   Future<void> getEvents() async {
+    activeCategory = null;
     await getAllEvents();
     final now = DateTime.now();
     events = events.where((e) => e.startTime.isAfter(now)).toList();
@@ -64,6 +66,7 @@ class EventProvider extends ChangeNotifier {
 
   // Events by category and future than now
   Future<void> getUpcomingEventsByCategory(String categoryName) async {
+    activeCategory = categoryName;
     await getAllEvents();
     final now = DateTime.now();
     events = events

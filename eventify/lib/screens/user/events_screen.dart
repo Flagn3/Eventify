@@ -1,3 +1,4 @@
+import 'package:eventify/widgets/clear_filters_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:eventify/providers/event_provider.dart';
@@ -5,8 +6,6 @@ import 'package:eventify/widgets/event_card.dart';
 
 class EventsScreen extends StatelessWidget {
   const EventsScreen({super.key});
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -20,16 +19,34 @@ class EventsScreen extends StatelessWidget {
       return Center(child: Text(eventProvider.errorMessage!));
     }
 
-    if (eventProvider.events.isEmpty) {
-      return const Center(child: Text("No hay eventos disponibles"));
-    }
+    // if (eventProvider.events.isEmpty) {
+    //   return const Center(child: Text("No hay eventos disponibles"));
+    // }
 
-    return ListView.builder(
-      itemCount: eventProvider.events.length,
-      itemBuilder: (context, index) {
-        final event = eventProvider.events[index];
-        return EventCard(event: event);
-      },
+    return Stack(
+      children: [
+        RefreshIndicator(
+          onRefresh: eventProvider.getEvents,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: eventProvider.events.isEmpty
+                ? [
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height - 100,
+                      child: const Center(
+                        child: Text("No hay eventos disponibles"),
+                      ),
+                    ),
+                  ]
+                : eventProvider.events
+                    .map((event) => EventCard(event: event))
+                    .toList(),
+          ),
+        ),
+
+        if (eventProvider.activeCategory != null)
+          ClearFiltersButton()
+      ],
     );
   }
 }
