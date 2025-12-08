@@ -1,7 +1,7 @@
-import 'package:eventify/providers/event_provider.dart';
+// import 'package:eventify/providers/event_provider.dart';
 // import 'package:eventify/providers/category_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+// import 'package:provider/provider.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'category_button.dart';
 
@@ -25,6 +25,7 @@ class FilterButton extends StatelessWidget {
         foregroundColor: Colors.white,
         backgroundColor: const Color(0xFF3C4869),
         shape: const CircleBorder(),
+        heroTag: null
       ),
 
       //Cerrar
@@ -33,9 +34,10 @@ class FilterButton extends StatelessWidget {
         builder: (BuildContext context, void Function()? onPressed,
             Animation<double> animation) {
           return FloatingActionButton(
+            heroTag: null,
             onPressed: () {
               // Quitar filtros al cerrar boton???
-              context.read<EventProvider>().getEvents();
+              // context.read<EventProvider>().getEvents();
               if (onPressed != null) onPressed();
             },
             backgroundColor: const Color(0xFF3C4869),

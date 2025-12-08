@@ -12,16 +12,19 @@ class CategoryButton extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
 
-    EventProvider eventProvider = context.read<EventProvider>();
+    EventProvider eventProvider = context.watch<EventProvider>();
+
+    final isSelected = eventProvider.activeCategory?.toLowerCase() == categoryName.toLowerCase();
 
     return FloatingActionButton.small(
       onPressed: categoryName=='All'?
         eventProvider.getEvents
         : () => eventProvider.getUpcomingEventsByCategory(categoryName),
-      backgroundColor: const Color(0xFF3C4869),
+      backgroundColor: isSelected ? Color(0xFFE53DB2) : const Color(0xFF3C4869),
       foregroundColor: Colors.white,
       child: selectIcon(categoryName),
       shape: const CircleBorder(),
+      heroTag: null
 
     );
   }
