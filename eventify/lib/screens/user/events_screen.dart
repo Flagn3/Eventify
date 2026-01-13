@@ -39,7 +39,49 @@ class EventsScreen extends StatelessWidget {
                     ),
                   ]
                 : eventProvider.events
-                    .map((event) => EventCard(event: event))
+                    .map((event) => EventCard(
+                      event: event,
+                      actions: ElevatedButton.icon(
+                        //TODO: registrar usuario en evento
+                        onPressed: () async{
+
+                          final confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Confirmar registro'),
+                                  content: Text('¿Quieres registrarte en el evento "${event.title}"?'),
+                                  actions: [
+                                    TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, false),
+                                        child: const Text('Cancelar')),
+                                    TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, true),
+                                        child: const Text('Registrarse')),
+                                  ],
+                                ),
+                              );
+
+                              if (confirm == true) {
+                                try{
+                                  //TODO llamada a la API registrar
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text("Te has registrado correctamente")),
+                                  );
+                                  await eventProvider.getEvents();
+
+                                } catch (e){
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text("Error al registrarse en el evento"))
+                                  );
+                                }
+                              }
+                        }, 
+                        icon: Icon(Icons.add),
+                        label: const Text("Registrarse en el evento"),  
+                        ),
+                      ))
                     .toList(),
           ),
         ),
