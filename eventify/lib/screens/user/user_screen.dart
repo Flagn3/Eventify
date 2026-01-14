@@ -3,6 +3,8 @@ import 'package:eventify/providers/user_provider.dart';
 // import 'package:eventify/screens/login/login_screen.dart';
 import 'package:eventify/screens/user/events_screen.dart';
 import 'package:eventify/screens/user/home_screen.dart';
+import 'package:eventify/screens/user/my_events_screen.dart';
+import 'package:eventify/screens/user/report_screen.dart';
 import 'package:eventify/widgets/filter_button.dart';
 import 'package:eventify/widgets/logout_button.dart';
 import 'package:eventify/widgets/user_avatar.dart';
@@ -36,6 +38,8 @@ class _UserScreenState extends State<UserScreen> {
     // const Center(child: Text('Home')),
     const HomeScreen(),
     const EventsScreen(),
+    const MyEventsScreen(),
+    const ReportScreen(),
   ];
 
   @override
@@ -71,6 +75,7 @@ class _UserScreenState extends State<UserScreen> {
 
       //Bottom navbar
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,  //para que no cambie a shifting
         currentIndex: currentIndex,
         onTap: (index) => setState(() => currentIndex = index),
         items: [
@@ -83,6 +88,16 @@ class _UserScreenState extends State<UserScreen> {
             icon: Icon(Icons.event_outlined),
             activeIcon: Icon(Icons.event),
             label: 'Events',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.event_outlined),
+            activeIcon: Icon(Icons.event),
+            label: 'My Events',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.picture_as_pdf_outlined),
+            activeIcon: Icon(Icons.picture_as_pdf),
+            label: 'Report',
           ),
         ],
         backgroundColor: Color(0xFFE53DB2),

@@ -5,11 +5,13 @@ import 'package:intl/intl.dart';
 
 class EventCard extends StatelessWidget {
   final Event event;
+  final Widget? actions;
   // final EventProvider eventProvider;
 
   const EventCard({
     super.key,
-    required this.event
+    required this.event,
+    this.actions
   });
 
   @override
@@ -110,9 +112,19 @@ class EventCard extends StatelessWidget {
                   )
               ],
             ),
-            )
+            ),
+
+            //para los botones
+            if (actions!=null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16), 
+                child: actions!,
+              ),
         ],
+        
       ),
+
+      
 
 
     );
