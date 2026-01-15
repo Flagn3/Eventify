@@ -80,4 +80,35 @@ class EventProvider extends ChangeNotifier {
     events.sort((a, b) => a.startTime.compareTo(b.startTime));
   }
 
+  //Events by user
+  Future<void> getEventsByUser(int id) async {
+    try {
+      isLoading = true;
+      errorMessage = null;
+      notifyListeners();
+
+      final token =  userProvider.activeUser?.rememberToken;   // User token
+
+      if (token == null) {
+        errorMessage = "No hay usuario autenticado.";
+        return;
+      }
+
+      // call to EventService getEvents
+      EventResponse response = await _eventService.getEventsByUser(id, token);
+
+
+      if (response.success == true) {
+        events = response.data;
+      } else {
+        errorMessage = response.message;
+      }
+    } catch (e) {
+      errorMessage = "Error inesperado: $e";
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
 }

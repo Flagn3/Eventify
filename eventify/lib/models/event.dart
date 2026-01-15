@@ -26,8 +26,8 @@ class Event{
     required this.imageUrl,
     required this.category,
     required this.location,
-    required this.latitude,
-    required this.longitude,
+   this.latitude,
+    this.longitude,
     this.maxAttendees,
     this.price,
     this.deleted
@@ -36,10 +36,12 @@ class Event{
   factory Event.fromEventsJson (Map<String, dynamic> json) => Event(
     id: json['id'],
     title: json['title'],
+    description: json['description'],
+    organizerId: json['organizer_id'],
     startTime: DateTime.parse(json['start_time']),
     endTime: DateTime.parse(json['end_time']),
     imageUrl: json['image_url'],
-    category: json['category'],
+    category: json['category'] ?? json['category_name'],
     location: json['location'],
     latitude: json['latitude'],
     longitude: json['longitude']
