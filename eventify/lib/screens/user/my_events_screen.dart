@@ -1,3 +1,4 @@
+import 'package:eventify/providers/user_provider.dart';
 import 'package:eventify/widgets/clear_filters_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +11,9 @@ class MyEventsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final eventProvider = Provider.of<EventProvider>(context);
+    
+    // Aquí obtienes el ID del usuario logueado
+    final userId = Provider.of<UserProvider>(context, listen: false).activeUser!.id;
 
     if (eventProvider.isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -19,14 +23,10 @@ class MyEventsScreen extends StatelessWidget {
       return Center(child: Text(eventProvider.errorMessage!));
     }
 
-    // if (eventProvider.events.isEmpty) {
-    //   return const Center(child: Text("No hay eventos disponibles"));
-    // }
-
     return Stack(
       children: [
         RefreshIndicator(
-          onRefresh: eventProvider.getEvents,
+          onRefresh: () => eventProvider.getEventsByUser(userId),
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: eventProvider.events.isEmpty
@@ -43,10 +43,10 @@ class MyEventsScreen extends StatelessWidget {
                     .toList(),
           ),
         ),
-
         if (eventProvider.activeCategory != null)
-          ClearFiltersButton()
+          ClearFiltersButton(),
       ],
     );
   }
 }
+
