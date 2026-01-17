@@ -18,11 +18,20 @@ class _ReportScreenState extends State<ReportScreen> {
   DateTime? startDate;
   DateTime? endDate;
 
-  final Map<String, bool> categories = {
+  // Estado de los checkboxes (UI)
+  final Map<String, bool> categorySelection = {
     'Música': false,
     'Deporte': false,
     'Tecnología': false,
     'Cultural': false,
+  };
+
+  // Mapeo UI -> Backend
+  final Map<String, String> categoryMap = {
+    'Música': 'Music',
+    'Deporte': 'Sport',
+    'Tecnología': 'Technology',
+    'Cultural': 'Cultural',
   };
 
   @override
@@ -37,33 +46,38 @@ class _ReportScreenState extends State<ReportScreen> {
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
+
           _buildDateField("Fecha inicio", startDate, (date) {
             if (!mounted) return;
             setState(() => startDate = date);
           }),
+
           _buildDateField("Fecha fin", endDate, (date) {
             if (!mounted) return;
             setState(() => endDate = date);
           }),
+
           const SizedBox(height: 16),
           const Text(
             "Tipos de evento",
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          ...categories.keys.map((key) {
+
+          ...categorySelection.keys.map((key) {
             return CheckboxListTile(
               title: Text(key),
-              value: categories[key],
+              value: categorySelection[key],
               onChanged: (value) {
                 if (!mounted) return;
-                setState(() => categories[key] = value ?? false);
+                setState(() => categorySelection[key] = value ?? false);
               },
             );
           }),
+
           const SizedBox(height: 24),
-          // Botón Generar PDF
+
           ElevatedButton(
-            onPressed: () => _handleGeneratePdf(),
+            onPressed: _handleGeneratePdf,
             child: const Text("Generar y abrir PDF"),
           ),
         ],
@@ -72,12 +86,17 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
   Widget _buildDateField(
-      String label, DateTime? value, Function(DateTime) onSelected) {
+    String label,
+    DateTime? value,
+    Function(DateTime) onSelected,
+  ) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       title: Text(label),
       subtitle: Text(
-        value == null ? "Seleccionar fecha" : "${value.day}-${value.month}-${value.year}",
+        value == null
+            ? "Seleccionar fecha"
+            : "${value.day}-${value.month}-${value.year}",
       ),
       trailing: const Icon(Icons.calendar_today),
       onTap: () async {
@@ -94,18 +113,26 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
   List<Event> _filterEvents(List<Event> allEvents) {
-    final selectedCategories = categories.entries
+    final selectedCategories = categorySelection.entries
         .where((entry) => entry.value)
-        .map((entry) => entry.key)
+        .map((entry) => categoryMap[entry.key])
+        .whereType<String>()
         .toList();
 
     DateTime _dateOnly(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
 
     return allEvents.where((event) {
       final eventDate = _dateOnly(event.startTime);
-      final matchStart = startDate == null || !eventDate.isBefore(_dateOnly(startDate!));
-      final matchEnd = endDate == null || !eventDate.isAfter(_dateOnly(endDate!));
-      final matchCategory = selectedCategories.isEmpty || selectedCategories.contains(event.category);
+
+      final matchStart =
+          !eventDate.isBefore(_dateOnly(startDate!));
+      final matchEnd =
+          !eventDate.isAfter(_dateOnly(endDate!));
+
+      final matchCategory =
+          selectedCategories.isEmpty ||
+          selectedCategories.contains(event.category);
+
       return matchStart && matchEnd && matchCategory;
     }).toList();
   }
@@ -115,31 +142,39 @@ class _ReportScreenState extends State<ReportScreen> {
 
     pdf.addPage(
       pw.Page(
-        build: (context) {
+        build: (_) {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Text(
                 "Informe de eventos",
-                style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
+                style: pw.TextStyle(
+                  fontSize: 24,
+                  fontWeight: pw.FontWeight.bold,
+                ),
               ),
               pw.SizedBox(height: 16),
-              if (startDate != null)
-                pw.Text("Fecha inicio: ${startDate!.day}-${startDate!.month}-${startDate!.year}"),
-              if (endDate != null)
-                pw.Text("Fecha fin: ${endDate!.day}-${endDate!.month}-${endDate!.year}"),
+              pw.Text(
+                "Fecha inicio: ${startDate!.day}-${startDate!.month}-${startDate!.year}",
+              ),
+              pw.Text(
+                "Fecha fin: ${endDate!.day}-${endDate!.month}-${endDate!.year}",
+              ),
               pw.SizedBox(height: 16),
-              pw.Text("Eventos:", style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+              pw.Text(
+                "Eventos:",
+                style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+              ),
               pw.SizedBox(height: 8),
               pw.Table.fromTextArray(
                 headers: ["Título", "Fecha", "Categoría"],
-                data: eventsToShow
-                    .map((e) => [
-                          e.title,
-                          "${e.startTime.day}-${e.startTime.month}-${e.startTime.year}",
-                          e.category
-                        ])
-                    .toList(),
+                data: eventsToShow.map((e) {
+                  return [
+                    e.title,
+                    "${e.startTime.day}-${e.startTime.month}-${e.startTime.year}",
+                    e.category,
+                  ];
+                }).toList(),
               ),
             ],
           );
@@ -156,7 +191,9 @@ class _ReportScreenState extends State<ReportScreen> {
   Future<void> _handleGeneratePdf() async {
     if (startDate == null || endDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Debes seleccionar fecha de inicio y fin")),
+        const SnackBar(
+          content: Text("Debes seleccionar fecha de inicio y fin"),
+        ),
       );
       return;
     }
@@ -166,10 +203,12 @@ class _ReportScreenState extends State<ReportScreen> {
     if (!mounted) return;
 
     final filteredEvents = _filterEvents(allEvents);
+
     if (filteredEvents.isEmpty) {
-      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No hay eventos que cumplan los filtros.")),
+        const SnackBar(
+          content: Text("No hay eventos que cumplan los filtros."),
+        ),
       );
       return;
     }
@@ -177,12 +216,13 @@ class _ReportScreenState extends State<ReportScreen> {
     final file = await _generatePdf(filteredEvents);
     if (!mounted) return;
 
-    // Abrir PDF automáticamente
     await OpenFile.open(file.path);
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("PDF guardado y abierto en: ${file.path}")),
+      SnackBar(
+        content: Text("PDF generado y abierto correctamente"),
+      ),
     );
   }
 }
