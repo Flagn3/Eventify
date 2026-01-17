@@ -122,4 +122,19 @@ class EventProvider extends ChangeNotifier {
     events = events.where((event) => !myEventIds.contains(event.id)).toList();
   }
 
+  Future<List<Event>> getAllEventsForReport() async {
+  try {
+    final token = userProvider.activeUser?.rememberToken;
+    if (token == null) return [];
+
+    final response = await _eventService.getEvents(token);
+    if (response.success) {
+      return response.data; // todos los eventos sin filtrar
+    }
+  } catch (e) {
+    print("Error al obtener todos los eventos: $e");
+  }
+  return [];
+}
+
 }
