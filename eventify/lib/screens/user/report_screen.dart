@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:eventify/models/event.dart';
 import 'package:eventify/providers/event_provider.dart';
-import 'package:eventify/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
@@ -25,29 +24,6 @@ class _ReportScreenState extends State<ReportScreen> {
     'Tecnología': false,
     'Cultural': false,
   };
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUserEmail();
-  }
-
-  Future<void> _loadUserEmail() async {
-    final userProvider = context.read<UserProvider>();
-    await userProvider.getUsers();
-    if (!mounted) return;
-
-    if (userProvider.activeUser != null) {
-      try {
-        final user = userProvider.userList.firstWhere(
-          (u) => u.id == userProvider.activeUser!.id,
-        );
-        userProvider.activeUser!.email = user.email;
-      } catch (_) {
-        userProvider.activeUser!.email = null;
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,24 +61,10 @@ class _ReportScreenState extends State<ReportScreen> {
             );
           }),
           const SizedBox(height: 24),
-          Row(
-            children: [
-              // Botón Generar PDF
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => _handleGeneratePdf(),
-                  child: const Text("Generar PDF"),
-                ),
-              ),
-              const SizedBox(width: 16),
-              // Botón Enviar PDF
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => _handleSendPdf(),
-                  child: const Text("Enviar PDF"),
-                ),
-              ),
-            ],
+          // Botón Generar PDF
+          ElevatedButton(
+            onPressed: () => _handleGeneratePdf(),
+            child: const Text("Generar y abrir PDF"),
           ),
         ],
       ),
@@ -192,6 +154,13 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
   Future<void> _handleGeneratePdf() async {
+    if (startDate == null || endDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Debes seleccionar fecha de inicio y fin")),
+      );
+      return;
+    }
+
     final eventProvider = context.read<EventProvider>();
     final allEvents = await eventProvider.getAllEventsForReport();
     if (!mounted) return;
@@ -214,41 +183,6 @@ class _ReportScreenState extends State<ReportScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("PDF guardado y abierto en: ${file.path}")),
-    );
-  }
-
-  Future<void> _handleSendPdf() async {
-    final eventProvider = context.read<EventProvider>();
-    final userProvider = context.read<UserProvider>();
-    final allEvents = await eventProvider.getAllEventsForReport();
-    if (!mounted) return;
-
-    final filteredEvents = _filterEvents(allEvents);
-    if (filteredEvents.isEmpty) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No hay eventos que cumplan los filtros.")),
-      );
-      return;
-    }
-
-    final file = await _generatePdf(filteredEvents);
-    if (!mounted) return;
-
-    final userEmail = userProvider.activeUser?.email;
-    if (userEmail == null || userEmail.isEmpty) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No se pudo obtener el email del usuario logueado")),
-      );
-      return;
-    }
-
-    await OpenFile.open(file.path);
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("PDF listo para enviar a $userEmail")),
     );
   }
 }
