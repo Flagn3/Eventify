@@ -75,6 +75,8 @@ class EventProvider extends ChangeNotifier {
     events = events
       .where((e) => e.category == categoryName && e.startTime.isAfter(now))
         .toList();
+    
+    filterOutMyEvents();
     ordeByDate();
     notifyListeners();
   }
@@ -103,6 +105,7 @@ class EventProvider extends ChangeNotifier {
 
       if (response.success == true) {
         myEvents = response.data;
+        myEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
       } else {
         errorMessage = response.message;
       }
