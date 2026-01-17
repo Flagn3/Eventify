@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:eventify/models/event.dart';
 import 'package:eventify/providers/event_provider.dart';
-import 'package:eventify/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
@@ -27,35 +26,7 @@ class _ReportScreenState extends State<ReportScreen> {
   };
 
   @override
-  void initState() {
-    super.initState();
-    _loadUserEmail();
-  }
-
-  Future<void> _loadUserEmail() async {
-    final userProvider = context.read<UserProvider>();
-    await userProvider.getUsers();
-
-    if (!mounted) return; // ⚠️ salir si widget desmontado
-
-    if (userProvider.activeUser != null) {
-      try {
-        final user = userProvider.userList.firstWhere(
-          (u) => u.id == userProvider.activeUser!.id,
-        );
-        userProvider.activeUser!.email = user.email;
-      } catch (e) {
-        userProvider.activeUser!.email = null;
-      }
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    // Usamos read() para no escuchar cambios y evitar rebuilds after dispose
-    final eventProvider = context.read<EventProvider>();
-    final userProvider = context.read<UserProvider>();
-
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -66,7 +37,6 @@ class _ReportScreenState extends State<ReportScreen> {
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-
           _buildDateField("Fecha inicio", startDate, (date) {
             if (!mounted) return;
             setState(() => startDate = date);
@@ -75,9 +45,7 @@ class _ReportScreenState extends State<ReportScreen> {
             if (!mounted) return;
             setState(() => endDate = date);
           }),
-
           const SizedBox(height: 16),
-
           const Text(
             "Tipos de evento",
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -92,87 +60,11 @@ class _ReportScreenState extends State<ReportScreen> {
               },
             );
           }),
-
           const SizedBox(height: 24),
-
-          Row(
-            children: [
-              // Botón Generar PDF
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final allEvents =
-                        await eventProvider.getAllEventsForReport();
-                    if (!mounted) return;
-
-                    final filteredEvents = _filterEvents(allEvents);
-
-                    if (filteredEvents.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                              "No hay eventos que cumplan los filtros."),
-                        ),
-                      );
-                      return;
-                    }
-
-                    final file = await _generatePdf(filteredEvents);
-                    if (!mounted) return;
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("PDF guardado en: ${file.path}")),
-                    );
-                  },
-                  child: const Text("Generar PDF"),
-                ),
-              ),
-              const SizedBox(width: 16),
-
-              // Botón Enviar PDF
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final allEvents =
-                        await eventProvider.getAllEventsForReport();
-                    if (!mounted) return;
-
-                    final filteredEvents = _filterEvents(allEvents);
-                    if (filteredEvents.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                              "No hay eventos que cumplan los filtros."),
-                        ),
-                      );
-                      return;
-                    }
-
-                    final file = await _generatePdf(filteredEvents);
-                    if (!mounted) return;
-
-                    final userEmail = userProvider.activeUser?.email;
-                    if (userEmail == null || userEmail.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                              "No se pudo obtener el email del usuario logueado"),
-                        ),
-                      );
-                      return;
-                    }
-
-                    await OpenFile.open(file.path);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("PDF listo para enviar a $userEmail"),
-                      ),
-                    );
-                  },
-                  child: const Text("Enviar PDF"),
-                ),
-              ),
-            ],
+          // Botón Generar PDF
+          ElevatedButton(
+            onPressed: () => _handleGeneratePdf(),
+            child: const Text("Generar y abrir PDF"),
           ),
         ],
       ),
@@ -185,9 +77,7 @@ class _ReportScreenState extends State<ReportScreen> {
       contentPadding: EdgeInsets.zero,
       title: Text(label),
       subtitle: Text(
-        value == null
-            ? "Seleccionar fecha"
-            : "${value.day}-${value.month}-${value.year}",
+        value == null ? "Seleccionar fecha" : "${value.day}-${value.month}-${value.year}",
       ),
       trailing: const Icon(Icons.calendar_today),
       onTap: () async {
@@ -209,17 +99,13 @@ class _ReportScreenState extends State<ReportScreen> {
         .map((entry) => entry.key)
         .toList();
 
-    DateTime _dateOnly(DateTime dt) =>
-        DateTime(dt.year, dt.month, dt.day);
+    DateTime _dateOnly(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
 
     return allEvents.where((event) {
       final eventDate = _dateOnly(event.startTime);
-      final matchStart =
-          startDate == null || !eventDate.isBefore(_dateOnly(startDate!));
-      final matchEnd =
-          endDate == null || !eventDate.isAfter(_dateOnly(endDate!));
-      final matchCategory =
-          selectedCategories.isEmpty || selectedCategories.contains(event.category);
+      final matchStart = startDate == null || !eventDate.isBefore(_dateOnly(startDate!));
+      final matchEnd = endDate == null || !eventDate.isAfter(_dateOnly(endDate!));
+      final matchCategory = selectedCategories.isEmpty || selectedCategories.contains(event.category);
       return matchStart && matchEnd && matchCategory;
     }).toList();
   }
@@ -233,19 +119,17 @@ class _ReportScreenState extends State<ReportScreen> {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text("Informe de eventos",
-                  style: pw.TextStyle(
-                      fontSize: 24, fontWeight: pw.FontWeight.bold)),
+              pw.Text(
+                "Informe de eventos",
+                style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
+              ),
               pw.SizedBox(height: 16),
               if (startDate != null)
-                pw.Text(
-                    "Fecha inicio: ${startDate!.day}-${startDate!.month}-${startDate!.year}"),
+                pw.Text("Fecha inicio: ${startDate!.day}-${startDate!.month}-${startDate!.year}"),
               if (endDate != null)
-                pw.Text(
-                    "Fecha fin: ${endDate!.day}-${endDate!.month}-${endDate!.year}"),
+                pw.Text("Fecha fin: ${endDate!.day}-${endDate!.month}-${endDate!.year}"),
               pw.SizedBox(height: 16),
-              pw.Text("Eventos:",
-                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+              pw.Text("Eventos:", style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 8),
               pw.Table.fromTextArray(
                 headers: ["Título", "Fecha", "Categoría"],
@@ -266,9 +150,39 @@ class _ReportScreenState extends State<ReportScreen> {
     final dir = await getApplicationDocumentsDirectory();
     final file = File('${dir.path}/informe_eventos.pdf');
     await file.writeAsBytes(await pdf.save());
-
-    await OpenFile.open(file.path);
     return file;
   }
-}
 
+  Future<void> _handleGeneratePdf() async {
+    if (startDate == null || endDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Debes seleccionar fecha de inicio y fin")),
+      );
+      return;
+    }
+
+    final eventProvider = context.read<EventProvider>();
+    final allEvents = await eventProvider.getAllEventsForReport();
+    if (!mounted) return;
+
+    final filteredEvents = _filterEvents(allEvents);
+    if (filteredEvents.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No hay eventos que cumplan los filtros.")),
+      );
+      return;
+    }
+
+    final file = await _generatePdf(filteredEvents);
+    if (!mounted) return;
+
+    // Abrir PDF automáticamente
+    await OpenFile.open(file.path);
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("PDF guardado y abierto en: ${file.path}")),
+    );
+  }
+}
