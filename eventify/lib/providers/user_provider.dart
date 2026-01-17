@@ -199,4 +199,20 @@ class UserProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  String? getLoggedUserEmail(){
+
+      if (activeUser == null || userList.isEmpty) return null;
+
+  try {
+    final user = userList.firstWhere(
+      (u) => u.id == activeUser!.id,
+    );
+    return user.email;
+  } catch (e) {
+    return null;
+  }
+
+  }
+  
 }
