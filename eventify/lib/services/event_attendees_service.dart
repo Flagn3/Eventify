@@ -11,7 +11,7 @@ class EventAttendeesService {
 
     final response = await http.post(
       url,
-      body: json.encode({'user_id' : userId, 'event_id': eventId, 'registered_at' : DateTime.now()}),
+      body: json.encode({'user_id' : userId, 'event_id': eventId, 'registered_at' : DateTime.now().toIso8601String()}),
       headers: {'Accept' : 'application/json', 'Authorization' : 'Bearer $token' , 'Content-Type' : 'application/json'} 
     );
 

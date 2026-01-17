@@ -12,10 +12,25 @@ class EventAttendeesResponse {
     required this.message
   });
 
-  factory EventAttendeesResponse.fromJson(Map<String, dynamic> json) => EventAttendeesResponse(
-    success: json['success'], 
-    data: (json['data'] as List)
-    .map((eventJson) => EventAttendees.fromEventsAttendeesJson(eventJson)).toList(), 
-    message: json['message']
-  );
+  factory EventAttendeesResponse.fromJson(Map<String, dynamic> json) {
+    List<EventAttendees> parsedData = [];
+
+    if (json['data'] != null) {
+      if (json['data'] is Map<String, dynamic>) {
+        // Cuando devuelve un solo objeto
+        parsedData = [EventAttendees.fromEventsAttendeesJson(json['data'])];
+      } else if (json['data'] is List) {
+        // Cuando devuelve una lista (por ejemplo otros endpoints)
+        parsedData = (json['data'] as List)
+            .map((e) => EventAttendees.fromEventsAttendeesJson(e))
+            .toList();
+      }
+    }
+
+    return EventAttendeesResponse(
+      success: json['success'] ?? false,
+      data: parsedData,
+      message: json['message'] ?? '',
+    );
+  }
 }

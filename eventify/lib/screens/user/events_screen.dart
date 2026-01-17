@@ -1,3 +1,5 @@
+import 'package:eventify/providers/event_attendees_provider.dart';
+import 'package:eventify/providers/user_provider.dart';
 import 'package:eventify/widgets/clear_filters_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +12,8 @@ class EventsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final eventProvider = Provider.of<EventProvider>(context);
+    final attendeesProvider = Provider.of<EventAttendeesProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     if (eventProvider.isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -62,21 +66,29 @@ class EventsScreen extends StatelessWidget {
                                   ],
                                 ),
                               );
+                              if (confirm != true) return;
+                              final attendeesProvider = context.read<EventAttendeesProvider>();
+                              final userProvider = context.read<UserProvider>();
+                              final userId = userProvider.activeUser!.id;
 
-                              if (confirm == true) {
-                                try{
-                                  //TODO llamada a la API registrar
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text("Te has registrado correctamente")),
-                                  );
-                                  await eventProvider.getEvents();
+                              // Llamada al provider
+                              await attendeesProvider.registerEvent(userId, event.id);
 
-                                } catch (e){
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text("Error al registrarse en el evento"))
-                                  );
-                                }
+                              // Si hubo error, mostrar SnackBar y salir
+                              if (attendeesProvider.errorMessage != null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(attendeesProvider.errorMessage!)),
+                                );
+                                return;
                               }
+
+                              // Si todo fue bien, mostrar éxito
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("Te has registrado correctamente")),
+                              );
+
+                              // Refrescar lista de eventos
+                              await eventProvider.getEvents();
                         }, 
                         icon: Icon(Icons.add),
                         label: const Text("Registrarse en el evento"),  

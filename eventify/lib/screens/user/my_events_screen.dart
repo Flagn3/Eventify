@@ -29,7 +29,7 @@ class MyEventsScreen extends StatelessWidget {
           onRefresh: () => eventProvider.getEventsByUser(userId),
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: eventProvider.events.isEmpty
+            children: eventProvider.myEvents.isEmpty
                 ? [
                     SizedBox(
                       height: MediaQuery.of(context).size.height - 100,
@@ -38,7 +38,7 @@ class MyEventsScreen extends StatelessWidget {
                       ),
                     ),
                   ]
-                : eventProvider.events
+                : eventProvider.myEvents
                     .map((event) => EventCard(event: event))
                     .toList(),
           ),
