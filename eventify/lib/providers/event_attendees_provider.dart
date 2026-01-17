@@ -1,5 +1,5 @@
 import 'package:eventify/providers/user_provider.dart';
-import 'package:eventify/services/event_attendees.dart';
+import 'package:eventify/services/event_attendees_service.dart';
 import 'package:flutter/material.dart';
 
 class EventAttendeesProvider extends ChangeNotifier {
@@ -16,17 +16,21 @@ class EventAttendeesProvider extends ChangeNotifier {
     errorMessage = null;
     loading = true;
     notifyListeners();
-  final token =  userProvider.activeUser?.rememberToken;
+    final token =  userProvider.activeUser?.rememberToken;
 
     if (token == null) {
       errorMessage = "No hay usuario autenticado.";
       return;
     }
     try {
-      await _eventService.registerEvent(userId, eventId, token);
+     final response = await _eventService.registerEvent(userId, eventId, token);
+
+    if (!response.success) {
+      errorMessage = response.message;
+    }
 
     } catch (e) {
-      errorMessage = e.toString();
+      errorMessage = "Error inesperado: $e";
     } finally {
       loading = false;
       notifyListeners();
@@ -45,10 +49,14 @@ class EventAttendeesProvider extends ChangeNotifier {
       return;
     }
     try {
-      await _eventService.unregisterEvent(userId, eventId, token);
+      final response = await _eventService.unregisterEvent(userId, eventId, token);
+
+      if (!response.success) {
+      errorMessage = response.message;
+    }
 
     } catch (e) {
-      errorMessage = e.toString();
+      errorMessage = "Error inesperado: $e";
     } finally {
       loading = false;
       notifyListeners();

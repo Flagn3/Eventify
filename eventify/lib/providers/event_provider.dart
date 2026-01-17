@@ -10,6 +10,7 @@ class EventProvider extends ChangeNotifier {
   final UserProvider userProvider;
 
   List<Event> events = [];
+  List<Event> myEvents = [];
   bool isLoading = false;
   String? errorMessage;
   String? activeCategory;
@@ -52,6 +53,8 @@ class EventProvider extends ChangeNotifier {
     await getAllEvents();
     final now = DateTime.now();
     events = events.where((e) => e.startTime.isAfter(now)).toList();
+    await getEventsByUser(userProvider.activeUser!.id);
+    filterOutMyEvents();
     ordeByDate();
     notifyListeners();
   }
@@ -99,7 +102,7 @@ class EventProvider extends ChangeNotifier {
 
 
       if (response.success == true) {
-        events = response.data;
+        myEvents = response.data;
       } else {
         errorMessage = response.message;
       }
@@ -109,6 +112,14 @@ class EventProvider extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
+  }
+
+  void filterOutMyEvents() {
+    if (myEvents.isEmpty) return;
+
+    final myEventIds = myEvents.map((e) => e.id).toSet();
+
+    events = events.where((event) => !myEventIds.contains(event.id)).toList();
   }
 
 }
