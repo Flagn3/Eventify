@@ -5,7 +5,6 @@ import 'package:eventify/services/event_service.dart';
 import 'package:flutter/material.dart';
 
 class EventProvider extends ChangeNotifier {
-
   final EventService _eventService = EventService();
   final UserProvider userProvider;
 
@@ -17,21 +16,34 @@ class EventProvider extends ChangeNotifier {
 
   EventProvider(this.userProvider);
 
- // List of events
+  // --- FLAG PARA EVITAR LLAMAR notifyListeners DESPUÉS DE DISPOSE ---
+  bool _disposed = false;
+
+  void safeNotifyListeners() {
+    if (!_disposed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
+  // ----------- MÉTODOS EXISTENTES (sin cambios) -----------
+
   Future<void> getAllEvents() async {
     try {
       isLoading = true;
       errorMessage = null;
-      notifyListeners();
+      safeNotifyListeners();
 
-      final token =  userProvider.activeUser?.rememberToken;   // User token
+      final token = userProvider.activeUser?.rememberToken;
 
       if (token == null) {
         errorMessage = "No hay usuario autenticado.";
         return;
       }
 
-      // call to EventService getEvents
       EventResponse response = await _eventService.getEvents(token);
 
       if (response.success == true) {
@@ -43,11 +55,10 @@ class EventProvider extends ChangeNotifier {
       errorMessage = "Error inesperado: $e";
     } finally {
       isLoading = false;
-      notifyListeners();
+      safeNotifyListeners();
     }
   }
 
-  //List events by dateTime
   Future<void> getEvents() async {
     activeCategory = null;
     await getAllEvents();
@@ -56,52 +67,46 @@ class EventProvider extends ChangeNotifier {
     await getEventsByUser(userProvider.activeUser!.id);
     filterOutMyEvents();
     ordeByDate();
-    notifyListeners();
+    safeNotifyListeners();
   }
 
-    // Events by category
   Future<void> getEventsByCategory(String categoryName) async {
     await getAllEvents();
     events = events.where((e) => e.category == categoryName).toList();
     ordeByDate();
-    notifyListeners();
+    safeNotifyListeners();
   }
 
-  // Events by category and future than now
   Future<void> getUpcomingEventsByCategory(String categoryName) async {
     activeCategory = categoryName;
     await getAllEvents();
     final now = DateTime.now();
     events = events
-      .where((e) => e.category == categoryName && e.startTime.isAfter(now))
+        .where((e) => e.category == categoryName && e.startTime.isAfter(now))
         .toList();
-    
     filterOutMyEvents();
     ordeByDate();
-    notifyListeners();
+    safeNotifyListeners();
   }
 
-  void ordeByDate (){
+  void ordeByDate() {
     events.sort((a, b) => a.startTime.compareTo(b.startTime));
   }
 
-  //Events by user
   Future<void> getEventsByUser(int id) async {
     try {
       isLoading = true;
       errorMessage = null;
-      notifyListeners();
+      safeNotifyListeners();
 
-      final token =  userProvider.activeUser?.rememberToken;   // User token
+      final token = userProvider.activeUser?.rememberToken;
 
       if (token == null) {
         errorMessage = "No hay usuario autenticado.";
         return;
       }
 
-      // call to EventService getEvents
       EventResponse response = await _eventService.getEventsByUser(id, token);
-
 
       if (response.success == true) {
         myEvents = response.data;
@@ -113,7 +118,7 @@ class EventProvider extends ChangeNotifier {
       errorMessage = "Error inesperado: $e";
     } finally {
       isLoading = false;
-      notifyListeners();
+      safeNotifyListeners();
     }
   }
 
@@ -121,23 +126,21 @@ class EventProvider extends ChangeNotifier {
     if (myEvents.isEmpty) return;
 
     final myEventIds = myEvents.map((e) => e.id).toSet();
-
     events = events.where((event) => !myEventIds.contains(event.id)).toList();
   }
 
   Future<List<Event>> getAllEventsForReport() async {
-  try {
-    final token = userProvider.activeUser?.rememberToken;
-    if (token == null) return [];
+    try {
+      final token = userProvider.activeUser?.rememberToken;
+      if (token == null) return [];
 
-    final response = await _eventService.getEvents(token);
-    if (response.success) {
-      return response.data; // todos los eventos sin filtrar
+      final response = await _eventService.getEvents(token);
+      if (response.success) {
+        return response.data;
+      }
+    } catch (e) {
+      print("Error al obtener todos los eventos: $e");
     }
-  } catch (e) {
-    print("Error al obtener todos los eventos: $e");
+    return [];
   }
-  return [];
-}
-
 }
