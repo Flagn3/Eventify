@@ -44,7 +44,8 @@ class Event{
     category: json['category'] ?? json['category_name'],
     location: json['location'],
     latitude: json['latitude'],
-    longitude: json['longitude']
+    longitude: json['longitude'],
+    price: json['price']
   );
 
 }

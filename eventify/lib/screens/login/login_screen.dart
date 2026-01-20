@@ -3,6 +3,7 @@ import 'package:eventify/screens/admin/admin_screen.dart';
 import 'package:eventify/screens/login/register_screen.dart';
 // import 'package:eventify/screens/test_screen.dart';
 import 'package:eventify/screens/user/user_screen.dart';
+import 'package:eventify/screens/organizer/organizer_screen.dart';
 import 'package:eventify/widgets/screens/text_and_password_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -114,11 +115,18 @@ class _LoginScreenState extends State<LoginScreen> {
                     final user = userProvider.activeUser;
 
                     if (user != null) {
-                      if (user.role == 'u' || user.role == 'o') {
+                      if (user.role == 'u') {
                         Navigator.of(context).pushReplacement(
                           MaterialPageRoute(
                             builder: (context) =>
                                 UserScreen(), //screen vacia de momento
+                          ),
+                        );
+                      }else if (user.role == 'o'){
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                OrganizerScreen(), //screen vacia de momento
                           ),
                         );
                       } else if (user.role == 'a') {

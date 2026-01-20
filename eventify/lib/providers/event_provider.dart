@@ -11,6 +11,7 @@ class EventProvider extends ChangeNotifier {
 
   List<Event> events = [];
   List<Event> myEvents = [];
+  List<Event> eventsByOrganizer = [];
   bool isLoading = false;
   String? errorMessage;
   String? activeCategory;
@@ -135,9 +136,41 @@ class EventProvider extends ChangeNotifier {
       return response.data; // todos los eventos sin filtrar
     }
   } catch (e) {
-    print("Error al obtener todos los eventos: $e");
+    errorMessage = '$e';
   }
   return [];
 }
+
+//Events by Organizer
+
+  Future<void> getEventsByOrganizer(int id) async {
+
+    try {
+      isLoading = true;
+      errorMessage = null;
+      notifyListeners();
+      
+      final token =  userProvider.activeUser?.rememberToken;   // User token
+      if (token == null) {
+        errorMessage = "No hay usuario autenticado.";
+        return;
+      }
+      
+      EventResponse response = await _eventService.getEventsByOrganizer(id, token);
+      
+      if(response.success == true){
+        eventsByOrganizer = response.data;
+        eventsByOrganizer.sort((a, b) => a.startTime.compareTo(b.startTime));
+      }else{
+        errorMessage = response.message;
+      }
+    } catch (e) {
+      errorMessage = '$e';
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+
+  }
 
 }

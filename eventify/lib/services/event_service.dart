@@ -34,5 +34,19 @@ class EventService {
 
     return eventResponse;
   }
+
+    Future<EventResponse> getEventsByOrganizer(int id, String token) async {
+    Uri url = Uri.parse('$_baseUrl/eventsByOrganizer');
+
+    final response = await http.post(
+      url,
+      body: json.encode({'id' : id}),
+      headers: {'Accept' : 'application/json', 'Authorization' : 'Bearer $token' , 'Content-Type' : 'application/json'}
+    );
+
+    final eventResponse = EventResponse.fromJson(json.decode(response.body));
+
+    return eventResponse;
+  }
 }
 
