@@ -11,9 +11,9 @@ class Event{
   double? latitude;
   double? longitude;
   int? maxAttendees;
-  double? price;
+  int? price;
   String imageUrl;
-  bool? deleted;
+  int? deleted;
 
 
   Event({
@@ -45,7 +45,8 @@ class Event{
     location: json['location'],
     latitude: json['latitude'],
     longitude: json['longitude'],
-    price: json['price']
+    price: json['price'],
+    deleted: json['deleted']
   );
 
 }

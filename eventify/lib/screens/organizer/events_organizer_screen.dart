@@ -1,4 +1,3 @@
-import 'package:eventify/providers/event_attendees_provider.dart';
 import 'package:eventify/providers/user_provider.dart';
 import 'package:eventify/widgets/clear_filters_button.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +12,7 @@ class EventsOrganizerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = context.watch<UserProvider>().activeUser;
     final eventProvider = context.watch<EventProvider>();
-    final attendeesProvider = context.watch<EventAttendeesProvider>();
+    
 
     if (user == null) {
       return const Center(child: CircularProgressIndicator());
@@ -32,10 +31,10 @@ class EventsOrganizerScreen extends StatelessWidget {
     return Stack(
       children: [
         RefreshIndicator(
-          onRefresh: () => eventProvider.getEventsByUser(userId),
+          onRefresh: () => eventProvider.getEventsByOrganizer(userId),
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: eventProvider.myEvents.isEmpty
+            children: eventProvider.eventsByOrganizer.isEmpty
                 ? [
                     SizedBox(
                       height: MediaQuery.of(context).size.height - 100,
@@ -81,12 +80,12 @@ class EventsOrganizerScreen extends StatelessWidget {
                               if (confirm == true) {
 
                                 //Change unregisterEvent for eventDelete
-                                await attendeesProvider.unregisterEvent(userId, event.id);
+                                await eventProvider.deleteEvent(event.id);
 
-                                if (attendeesProvider.errorMessage != null) {
+                                if (eventProvider.errorMessage != null) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text(attendeesProvider.errorMessage!),
+                                      content: Text(eventProvider.errorMessage!),
                                     ),
                                   );
                                   return;
@@ -98,9 +97,8 @@ class EventsOrganizerScreen extends StatelessWidget {
                                   ),
                                 );
 
-                                await eventProvider.getEventsByUser(userId);
-                                //actualizar los otros eventos
-                                await eventProvider.getEvents();
+                                await eventProvider.getEventsByOrganizer(userId);
+
                               }
 
                             },
@@ -138,12 +136,12 @@ class EventsOrganizerScreen extends StatelessWidget {
 
                               if (confirm == true) {
                                 //Change unregisterEvent for eventUpdate
-                                await attendeesProvider.unregisterEvent(userId, event.id);
+                                await eventProvider.updateEvent(event.id);
 
-                                if (attendeesProvider.errorMessage != null) {
+                                if (eventProvider.errorMessage != null) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text(attendeesProvider.errorMessage!),
+                                      content: Text(eventProvider.errorMessage!),
                                     ),
                                   );
                                   return;

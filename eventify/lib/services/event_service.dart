@@ -48,5 +48,34 @@ class EventService {
 
     return eventResponse;
   }
+
+  Future<EventResponse> eventDelete(int id, String token) async {
+    Uri url = Uri.parse('$_baseUrl/eventDelete');
+
+    final response = await http.post(
+      url,
+      body: json.encode({'id' : id}),
+      headers: {'Accept' : 'application/json', 'Authorization' : 'Bearer $token' , 'Content-Type' : 'application/json'}
+    );
+
+    final eventResponse = EventResponse.fromJson(json.decode(response.body));
+
+    return eventResponse;
+  }
+
+  Future<EventResponse> eventUpdate(int id, String token) async {
+    Uri url = Uri.parse('$_baseUrl/eventUpdate');
+
+    final response = await http.post(
+      url,
+      body: json.encode({'id' : id}),
+      headers: {'Accept' : 'application/json', 'Authorization' : 'Bearer $token' , 'Content-Type' : 'application/json'}
+    );
+
+    final eventResponse = EventResponse.fromJson(json.decode(response.body));
+
+    return eventResponse;
+  }
+
 }
 
