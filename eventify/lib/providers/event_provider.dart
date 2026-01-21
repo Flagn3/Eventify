@@ -203,7 +203,11 @@ class EventProvider extends ChangeNotifier {
 
   } 
 
-  Future<void> updateEvent(int eventId) async {
+  Future<void> updateEvent(int eventId, int organizerId, String title, 
+                                    String description, String category, DateTime startTime,
+                                    DateTime endTime, String location, int latitude,
+                                    int longitude, int maxAtendees, int price,
+                                    String imageUrl) async {
 
     try {
       isLoading = true;
@@ -216,7 +220,10 @@ class EventProvider extends ChangeNotifier {
         return;
       }
       
-      EventResponse response = await _eventService.eventUpdate(eventId, token);
+      EventResponse response = await _eventService.eventUpdate(eventId,organizerId,title, 
+        description, category, startTime, endTime, location, latitude, 
+        longitude, maxAtendees, price, imageUrl ,token
+      );
       
       if(response.success == false){
         errorMessage = response.message;

@@ -131,7 +131,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
                       } else if (user.role == 'a') {
                         //redirect a admin view
-                        print('admin redirect');
                         Navigator.of(context).pushReplacement(
                           MaterialPageRoute(
                             builder: (context) => AdminScreen(),
