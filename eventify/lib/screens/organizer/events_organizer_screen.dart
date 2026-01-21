@@ -1,4 +1,5 @@
 import 'package:eventify/providers/user_provider.dart';
+import 'package:eventify/screens/organizer/edit_event_screen.dart';
 import 'package:eventify/widgets/clear_filters_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -128,7 +129,7 @@ class EventsOrganizerScreen extends StatelessWidget {
                                     TextButton(
                                       onPressed: () =>
                                           Navigator.pop(context, true),
-                                      child: const Text('Sí, eliminar'),
+                                      child: const Text('Sí, editar'),
                                     ),
                                   ],
                                 ),
@@ -136,31 +137,16 @@ class EventsOrganizerScreen extends StatelessWidget {
 
                               if (confirm == true) {
                                 //Change unregisterEvent for eventUpdate
-                                await eventProvider.updateEvent(event.id);
-
-                                if (eventProvider.errorMessage != null) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(eventProvider.errorMessage!),
-                                    ),
-                                  );
-                                  return;
-                                }
-
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text("Evento eliminado correctamente"),
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                    builder: (context) => EditEventScreen(event: event, user: user),
                                   ),
                                 );
-
-                                await eventProvider.getEventsByUser(userId);
-                                //actualizar los otros eventos
-                                await eventProvider.getEvents();
                               }
 
                             },
                             icon: const Icon(Icons.edit),
-                            label: const Text("Eliminar evento"),
+                            label: const Text("Editar evento"),
                           ),
                         ],
                       ),

@@ -63,12 +63,29 @@ class EventService {
     return eventResponse;
   }
 
-  Future<EventResponse> eventUpdate(int id, String token) async {
+  Future<EventResponse> eventUpdate(int id,int organizerId, String title, 
+                                    String description, String category, DateTime startTime,
+                                    DateTime endTime, String location, int latitude,
+                                    int longitude, int maxAtendees, int price,
+                                    String imageUrl ,String token) async {
     Uri url = Uri.parse('$_baseUrl/eventUpdate');
 
     final response = await http.post(
       url,
-      body: json.encode({'id' : id}),
+      body: json.encode({'id' : id,
+                         'organizer_id' : organizerId,
+                         'title' : title,
+                         'description' : description,
+                         'category' : category,
+                         'start_time' : startTime,
+                         'end_time' : endTime,
+                         'location' : location,
+                         'latitude' : latitude,
+                         'longitude' : longitude,
+                         'max_attendees' : maxAtendees,
+                         'price' : price,
+                         'image_url' : imageUrl
+                         }),
       headers: {'Accept' : 'application/json', 'Authorization' : 'Bearer $token' , 'Content-Type' : 'application/json'}
     );
 
