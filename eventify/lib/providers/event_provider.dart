@@ -160,6 +160,7 @@ class EventProvider extends ChangeNotifier {
       
       if(response.success == true){
         eventsByOrganizer = response.data;
+        eventsByOrganizer.removeWhere((e)=> e.deleted == 1);
         eventsByOrganizer.sort((a, b) => a.startTime.compareTo(b.startTime));
       }else{
         errorMessage = response.message;
@@ -173,4 +174,59 @@ class EventProvider extends ChangeNotifier {
 
   }
 
+  //delete an event
+
+  Future<void> deleteEvent(int eventId) async {
+
+    try {
+      isLoading = true;
+      errorMessage = null;
+      notifyListeners();
+      
+      final token =  userProvider.activeUser?.rememberToken;   // User token
+      if (token == null) {
+        errorMessage = "No hay usuario autenticado.";
+        return;
+      }
+      
+      EventResponse response = await _eventService.eventDelete(eventId, token);
+      
+      if(response.success == false){
+        errorMessage = response.message;
+      }
+    } catch (e) {
+      errorMessage = '$e';
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+
+  } 
+
+  Future<void> updateEvent(int eventId) async {
+
+    try {
+      isLoading = true;
+      errorMessage = null;
+      notifyListeners();
+      
+      final token =  userProvider.activeUser?.rememberToken;   // User token
+      if (token == null) {
+        errorMessage = "No hay usuario autenticado.";
+        return;
+      }
+      
+      EventResponse response = await _eventService.eventUpdate(eventId, token);
+      
+      if(response.success == false){
+        errorMessage = response.message;
+      }
+    } catch (e) {
+      errorMessage = '$e';
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+
+  } 
 }

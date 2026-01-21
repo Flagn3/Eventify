@@ -25,8 +25,12 @@ class _OrganizerScreenState extends State<OrganizerScreen> {
     super.initState();
 
     Future.microtask(() {
-      context.read<EventProvider>().getEvents();
+      final user = context.read<UserProvider>().activeUser;
+      if (user != null) {
+        context.read<EventProvider>().getEventsByOrganizer(user.id);
+      }
     });
+
 
     // final eventProvider = context.read<EventProvider>().getEvents();
   }
