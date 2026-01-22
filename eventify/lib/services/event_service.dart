@@ -65,8 +65,8 @@ class EventService {
 
   Future<EventResponse> eventUpdate(int id,int organizerId, String title, 
                                     String description, String category, DateTime startTime,
-                                    DateTime endTime, String location, int latitude,
-                                    int longitude, int maxAtendees, int price,
+                                    DateTime endTime, String location, int? latitude,
+                                    int? longitude, int? maxAtendees, int? price,
                                     String imageUrl ,String token) async {
     Uri url = Uri.parse('$_baseUrl/eventUpdate');
 

@@ -205,8 +205,8 @@ class EventProvider extends ChangeNotifier {
 
   Future<void> updateEvent(int eventId, int organizerId, String title, 
                                     String description, String category, DateTime startTime,
-                                    DateTime endTime, String location, int latitude,
-                                    int longitude, int maxAtendees, int price,
+                                    DateTime endTime, String location, int? latitude,
+                                    int? longitude, int? maxAtendees, int? price,
                                     String imageUrl) async {
 
     try {
