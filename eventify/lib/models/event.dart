@@ -8,8 +8,8 @@ class Event{
   DateTime startTime;
   DateTime endTime;
   String location;
-  double? latitude;
-  double? longitude;
+  int? latitude;
+  int? longitude;
   int? maxAttendees;
   int? price;
   String imageUrl;
