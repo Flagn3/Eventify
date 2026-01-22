@@ -1,4 +1,5 @@
 import 'package:eventify/providers/user_provider.dart';
+import 'package:eventify/screens/organizer/create_event_screen.dart';
 import 'package:eventify/screens/organizer/edit_event_screen.dart';
 import 'package:eventify/widgets/clear_filters_button.dart';
 import 'package:flutter/material.dart';
@@ -171,8 +172,14 @@ class EventsOrganizerScreen extends StatelessWidget {
       ),
 
       floatingActionButton: FloatingActionButton(
+        heroTag: null,
         onPressed: () {
           // TODO: ir a crear evento
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => CreateEventScreen(user : user)
+            )
+          );
         },
         backgroundColor: const Color(0xFFE35EB3),
         child: const Icon(Icons.add),

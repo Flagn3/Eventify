@@ -56,14 +56,16 @@ class EventCard extends StatelessWidget {
             child: Row(
               children: [
                 //imagen
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.network(
-                    event.imageUrl,
-                    width: 165,
-                    height: 165,
-                    fit: BoxFit.cover,
-                    // errorBuilder: ,    //ponerle un placeholder por si falla
+                Hero(tag: 'event-image-${event.id}',
+                child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.network(
+                      event.imageUrl,
+                      width: 165,
+                      height: 165,
+                      fit: BoxFit.cover,
+                      // errorBuilder: ,    //ponerle un placeholder por si falla
+                    ),
                   ),
                 ),
 

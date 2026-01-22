@@ -8,37 +8,49 @@ class EditEventScreen extends StatefulWidget {
   final Event event;
   final User user;
 
-  const EditEventScreen({super.key, required this.event, required this.user});
+  const EditEventScreen({
+    super.key,
+    required this.event,
+    required this.user,
+  });
 
   @override
   State<EditEventScreen> createState() => _EditEventScreenState();
 }
 
 class _EditEventScreenState extends State<EditEventScreen> {
-  
   late TextEditingController titleController;
   late TextEditingController descriptionController;
-  late TextEditingController categoryController;
-  late String selectedCategory;
+
+  int? selectedCategoryId;
 
   DateTime? startDate;
   DateTime? endDate;
 
-  final List<String> categoryOptions = [
-    'Sport',
-    'Cultural',
-    'Technology',
-    'Music',
-  ];
+  final Map<int, String> categoryOptions = {
+    1: 'Music',
+    2: 'Sport',
+    3: 'Technology',
+    4: 'Cultural',
+  };
 
+  final Map<int, String> categoryImages = {
+    1: 'https://apiflutter.iaknowhow.es/public/images/musica.jpg',
+    2: 'https://apiflutter.iaknowhow.es/public/images/deporte.jpg',
+    3: 'https://apiflutter.iaknowhow.es/public/images/tecnologia.jpg',
+    4: 'https://apiflutter.iaknowhow.es/public/images/reyes.png',
+    };
 
   @override
   void initState() {
     super.initState();
+
     titleController = TextEditingController(text: widget.event.title);
-    descriptionController = TextEditingController(text: widget.event.description);
-    categoryController = TextEditingController(text: widget.event.category);
-    selectedCategory = widget.event.category;
+    descriptionController =
+        TextEditingController(text: widget.event.description ?? '');
+
+    selectedCategoryId = widget.event.categoryId;
+
     startDate = widget.event.startTime;
     endDate = widget.event.endTime;
   }
@@ -47,17 +59,12 @@ class _EditEventScreenState extends State<EditEventScreen> {
   void dispose() {
     titleController.dispose();
     descriptionController.dispose();
-    /*
-    startTimeController.dispose();
-    endTimeController.dispose();
-    */
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-
-    final eventProvider = context.watch<EventProvider>(); 
+    final eventProvider = context.watch<EventProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -65,9 +72,10 @@ class _EditEventScreenState extends State<EditEventScreen> {
         backgroundColor: const Color(0xFFE35EB3),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),     
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
+            // TITLE
             TextField(
               controller: titleController,
               decoration: const InputDecoration(
@@ -75,7 +83,10 @@ class _EditEventScreenState extends State<EditEventScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
+
             const SizedBox(height: 20),
+
+            // DESCRIPTION
             TextField(
               controller: descriptionController,
               decoration: const InputDecoration(
@@ -83,11 +94,12 @@ class _EditEventScreenState extends State<EditEventScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 20,),
-            DropdownButtonFormField<String>(
-              value: categoryOptions.contains(selectedCategory)
-                  ? selectedCategory
-                  : null,
+
+            const SizedBox(height: 20),
+
+            // CATEGORY DROPDOWN
+            DropdownButtonFormField<int>(
+              value: selectedCategoryId,
               decoration: InputDecoration(
                 labelText: "Categoria",
                 filled: true,
@@ -96,36 +108,39 @@ class _EditEventScreenState extends State<EditEventScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              items: categoryOptions
+              items: categoryOptions.entries
                   .map(
-                    (value) => DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
+                    (e) => DropdownMenuItem<int>(
+                      value: e.key,
+                      child: Text(e.value),
                     ),
                   )
                   .toList(),
               onChanged: (newValue) {
                 setState(() {
-                  selectedCategory = newValue!;
-                  categoryController.text = newValue;
+                  selectedCategoryId = newValue!;
                 });
               },
             ),
+
             const SizedBox(height: 20),
 
+            // START DATE
             _buildDateField("Fecha inicio", startDate, (date) {
               setState(() => startDate = date);
             }),
 
+            // END DATE
             _buildDateField("Fecha fin", endDate, (date) {
               setState(() => endDate = date);
             }),
+
             const SizedBox(height: 20),
+
             eventProvider.isLoading
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
                     onPressed: () async {
-                      // Validamos que el nombre no esté vacío
                       if (titleController.text.trim().isEmpty) {
                         _showError("El título no puede estar vacío");
                         return;
@@ -136,7 +151,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
                         return;
                       }
 
-                      if (selectedCategory.isEmpty) {
+                      if (selectedCategoryId == null) {
                         _showError("Debes elegir una categoría");
                         return;
                       }
@@ -152,90 +167,125 @@ class _EditEventScreenState extends State<EditEventScreen> {
                       }
 
                       if (endDate!.isBefore(startDate!)) {
-                        _showError("La fecha final no puede ser anterior a la inicial");
+                        _showError(
+                          "La fecha final no puede ser anterior a la inicial",
+                        );
                         return;
                       }
-                      // TODO: finish the edit screen
-                      
-                      await eventProvider.updateEvent(
-                          widget.event.id, widget.user.id, titleController.text.trim(), descriptionController.text.trim(),
-                          categoryController.text.trim(), startDate!, endDate!, widget.event.location,
-                          widget.event.latitude, widget.event.longitude, widget.event.maxAttendees,
-                          widget.event.price, widget.event.imageUrl  
+
+                      final newStart = buildDateTime(
+                        startDate!,
+                        widget.event.startTime,
                       );
-                      
-                      await eventProvider.getEventsByOrganizer(widget.user.id);
+
+                      final newEnd = buildDateTime(
+                        endDate!,
+                        widget.event.endTime,
+                      );
+
+                      final imageUrl = categoryImages[selectedCategoryId] ?? widget.event.imageUrl;
+
+                      await eventProvider.updateEvent(
+                        widget.event.id,
+                        widget.user.id,
+                        descriptionController.text.trim(),
+                        titleController.text.trim(),
+                        selectedCategoryId!,
+                        newStart,
+                        newEnd,
+                        widget.event.location,
+                        widget.event.latitude,
+                        widget.event.longitude,
+                        widget.event.maxAttendees,
+                        widget.event.price,
+                        imageUrl,
+                      );
+
+                      await eventProvider
+                          .getEventsByOrganizer(widget.user.id);
 
                       if (eventProvider.errorMessage == null) {
-                        
+                        if (!mounted) return;
+
                         Navigator.pop(context);
+
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Evento editado con éxito') ,
+                          const SnackBar(
+                            content: Text("Evento editado con éxito"),
                             backgroundColor: Colors.green,
                             duration: Duration(seconds: 2),
-                          )
+                          ),
                         );
-
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                              content: Text(eventProvider.errorMessage ?? '')),
+                            content:
+                                Text(eventProvider.errorMessage ?? ""),
+                          ),
                         );
                       }
                     },
                     child: const Text("Guardar"),
                   ),
-                  ElevatedButton(onPressed: (){
-                    Navigator.pop(context);
-                  }, child: const Text("Volver"))
+
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Volver"),
+            ),
           ],
         ),
       ),
     );
   }
 
+  Widget _buildDateField(
+    String label,
+    DateTime? value,
+    Function(DateTime) onSelected,
+  ) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(label),
+      subtitle: Text(
+        value == null
+            ? "Seleccionar fecha"
+            : "${value.day}-${value.month}-${value.year}",
+      ),
+      trailing: const Icon(Icons.calendar_today),
+      onTap: () async {
+        final date = await showDatePicker(
+          context: context,
+          initialDate: value ?? DateTime.now(),
+          firstDate: DateTime(2020),
+          lastDate: DateTime(2035),
+        );
 
+        if (!mounted) return;
 
-Widget _buildDateField(
-  String label,
-  DateTime? value,
-  Function(DateTime) onSelected,
-) {
-  return ListTile(
-    contentPadding: EdgeInsets.zero,
-    title: Text(label),
-    subtitle: Text(
-      value == null
-          ? "Seleccionar fecha"
-          : "${value.day}-${value.month}-${value.year}",
-    ),
-    trailing: const Icon(Icons.calendar_today),
-    onTap: () async {
-      final date = await showDatePicker(
-        context: context,
-        initialDate: value ?? DateTime.now(),
-        firstDate: DateTime(2020),
-        lastDate: DateTime(2035),
-      );
+        if (date != null) onSelected(date);
+      },
+    );
+  }
 
-      if (!mounted) return;
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
 
-      if (date != null) onSelected(date);
-    },
-  );
+  DateTime buildDateTime(DateTime date, DateTime original) {
+    return DateTime(
+      date.year,
+      date.month,
+      date.day,
+      original.hour,
+      original.minute,
+      original.second,
+    );
+  }
 }
-
-void _showError(String msg) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(msg),
-      backgroundColor: Colors.red,
-    ),
-  );
-}
-
-
-}
-
-
-
