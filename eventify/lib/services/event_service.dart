@@ -64,7 +64,7 @@ class EventService {
   }
 
   Future<EventResponse> eventUpdate(int id,int organizerId, String title, 
-                                    String description, String category, DateTime startTime,
+                                    String description, int category, DateTime startTime,
                                     DateTime endTime, String location, int? latitude,
                                     int? longitude, int? maxAtendees, int? price,
                                     String imageUrl ,String token) async {
@@ -76,9 +76,9 @@ class EventService {
                          'organizer_id' : organizerId,
                          'title' : title,
                          'description' : description,
-                         'category' : category,
-                         'start_time' : startTime,
-                         'end_time' : endTime,
+                         'category_id' : category,
+                         'start_time': startTime.toIso8601String(),
+                         'end_time': endTime.toIso8601String(),
                          'location' : location,
                          'latitude' : latitude,
                          'longitude' : longitude,
@@ -93,6 +93,34 @@ class EventService {
 
     return eventResponse;
   }
+
+  Future<EventResponse> eventCreate(int organizerId, String title, 
+                                    String description, int category, DateTime startTime,
+                                    DateTime endTime, String location,int? price,
+                                    String imageUrl ,String token) async {
+    Uri url = Uri.parse('$_baseUrl/events');
+
+    final response = await http.post(
+      url,
+      body: json.encode({
+                         'organizer_id' : organizerId,
+                         'title' : title,
+                         'description' : description,
+                         'category_id' : category,
+                         'start_time': startTime.toIso8601String(),
+                         'end_time': endTime.toIso8601String(),
+                         'location' : location,
+                         'price' : price,
+                         'image_url' : imageUrl
+                         }),
+      headers: {'Accept' : 'application/json', 'Authorization' : 'Bearer $token' , 'Content-Type' : 'application/json'}
+    );
+
+    final eventResponse = EventResponse.fromJson(json.decode(response.body));
+
+    return eventResponse;
+  }
+
 
 }
 

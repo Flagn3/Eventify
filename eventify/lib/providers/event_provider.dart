@@ -204,7 +204,7 @@ class EventProvider extends ChangeNotifier {
   } 
 
   Future<void> updateEvent(int eventId, int organizerId, String title, 
-                                    String description, String category, DateTime startTime,
+                                    String description, int category, DateTime startTime,
                                     DateTime endTime, String location, int? latitude,
                                     int? longitude, int? maxAtendees, int? price,
                                     String imageUrl) async {
@@ -236,4 +236,37 @@ class EventProvider extends ChangeNotifier {
     }
 
   } 
+
+  Future<void> createEvent(int organizerId, String title, 
+                                    String description, int category, DateTime startTime,
+                                    DateTime endTime, String location, int? price,
+                                    String imageUrl) async {
+
+    try {
+      isLoading = true;
+      errorMessage = null;
+      notifyListeners();
+      
+      final token =  userProvider.activeUser?.rememberToken;   // User token
+      if (token == null) {
+        errorMessage = "No hay usuario autenticado.";
+        return;
+      }
+      
+      EventResponse response = await _eventService.eventCreate(organizerId,title, 
+        description, category, startTime, endTime, location, price, imageUrl ,token
+      );
+      
+      if(response.success == false){
+        errorMessage = response.message;
+      }
+    } catch (e) {
+      errorMessage = '$e';
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+
+  } 
+
 }
