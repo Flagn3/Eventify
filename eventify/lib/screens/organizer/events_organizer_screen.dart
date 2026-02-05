@@ -87,6 +87,7 @@ class EventsOrganizerScreen extends StatelessWidget {
 
                                 if (confirm == true) {
                                   await eventProvider.deleteEvent(event.id);
+                                  await eventProvider.refreshOrganizerEvents();
 
                                   if (eventProvider.errorMessage != null) {
                                     ScaffoldMessenger.of(context).showSnackBar(

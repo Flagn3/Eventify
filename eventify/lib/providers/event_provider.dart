@@ -5,27 +5,27 @@ import 'package:eventify/services/event_service.dart';
 import 'package:flutter/material.dart';
 
 class EventProvider extends ChangeNotifier {
-
   final EventService _eventService = EventService();
   final UserProvider userProvider;
 
   List<Event> events = [];
   List<Event> myEvents = [];
   List<Event> eventsByOrganizer = [];
+  List<Event> eventsByOrganizerForStats = [];
   bool isLoading = false;
   String? errorMessage;
   String? activeCategory;
 
   EventProvider(this.userProvider);
 
- // List of events
+  // List of events
   Future<void> getAllEvents() async {
     try {
       isLoading = true;
       errorMessage = null;
       notifyListeners();
 
-      final token =  userProvider.activeUser?.rememberToken;   // User token
+      final token = userProvider.activeUser?.rememberToken; // User token
 
       if (token == null) {
         errorMessage = "No hay usuario autenticado.";
@@ -41,7 +41,7 @@ class EventProvider extends ChangeNotifier {
         errorMessage = response.message;
       }
     } catch (e) {
-      errorMessage = "Error inesperado: $e";
+      errorMessage = "Error inesperadooo: $e";
     } finally {
       isLoading = false;
       notifyListeners();
@@ -54,13 +54,16 @@ class EventProvider extends ChangeNotifier {
     await getAllEvents();
     final now = DateTime.now();
     events = events.where((e) => e.startTime.isAfter(now)).toList();
-    await getEventsByUser(userProvider.activeUser!.id);
-    filterOutMyEvents();
+
+    if (userProvider.activeUser?.role == 'o') {
+      await getEventsByUser(userProvider.activeUser!.id);
+      filterOutMyEvents();
+    }
     ordeByDate();
     notifyListeners();
   }
 
-    // Events by category
+  // Events by category
   Future<void> getEventsByCategory(String categoryName) async {
     await getAllEvents();
     events = events.where((e) => e.category == categoryName).toList();
@@ -74,15 +77,15 @@ class EventProvider extends ChangeNotifier {
     await getAllEvents();
     final now = DateTime.now();
     events = events
-      .where((e) => e.category == categoryName && e.startTime.isAfter(now))
+        .where((e) => e.category == categoryName && e.startTime.isAfter(now))
         .toList();
-    
+
     filterOutMyEvents();
     ordeByDate();
     notifyListeners();
   }
 
-  void ordeByDate (){
+  void ordeByDate() {
     events.sort((a, b) => a.startTime.compareTo(b.startTime));
   }
 
@@ -93,7 +96,7 @@ class EventProvider extends ChangeNotifier {
       errorMessage = null;
       notifyListeners();
 
-      final token =  userProvider.activeUser?.rememberToken;   // User token
+      final token = userProvider.activeUser?.rememberToken; // User token
 
       if (token == null) {
         errorMessage = "No hay usuario autenticado.";
@@ -102,7 +105,6 @@ class EventProvider extends ChangeNotifier {
 
       // call to EventService getEvents
       EventResponse response = await _eventService.getEventsByUser(id, token);
-
 
       if (response.success == true) {
         myEvents = response.data;
@@ -127,43 +129,47 @@ class EventProvider extends ChangeNotifier {
   }
 
   Future<List<Event>> getAllEventsForReport() async {
-  try {
-    final token = userProvider.activeUser?.rememberToken;
-    if (token == null) return [];
+    try {
+      final token = userProvider.activeUser?.rememberToken;
+      if (token == null) return [];
 
-    final response = await _eventService.getEvents(token);
-    if (response.success) {
-      return response.data; // todos los eventos sin filtrar
+      final response = await _eventService.getEvents(token);
+      if (response.success) {
+        return response.data; // todos los eventos sin filtrar
+      }
+    } catch (e) {
+      errorMessage = '$e';
     }
-  } catch (e) {
-    errorMessage = '$e';
+    return [];
   }
-  return [];
-}
 
-//Events by Organizer
+  //Events by Organizer
 
   Future<void> getEventsByOrganizer(int id) async {
-
     try {
       isLoading = true;
       errorMessage = null;
       notifyListeners();
-      
-      final token =  userProvider.activeUser?.rememberToken;   // User token
+
+      final token = userProvider.activeUser?.rememberToken; // User token
       if (token == null) {
         errorMessage = "No hay usuario autenticado.";
         return;
       }
-      
-      EventResponse response = await _eventService.getEventsByOrganizer(id, token);
-      
-      if(response.success == true){
+
+      EventResponse response = await _eventService.getEventsByOrganizer(
+        id,
+        token,
+      );
+
+      if (response.success == true) {
         eventsByOrganizer = response.data;
-        eventsByOrganizer.removeWhere((e)=> e.deleted == 1);
-        eventsByOrganizer.removeWhere((e) => e.startTime.isBefore(DateTime.now()));
+        eventsByOrganizer.removeWhere((e) => e.deleted == 1);
+        eventsByOrganizer.removeWhere(
+          (e) => e.startTime.isBefore(DateTime.now()),
+        );
         eventsByOrganizer.sort((a, b) => a.startTime.compareTo(b.startTime));
-      }else{
+      } else {
         errorMessage = response.message;
       }
     } catch (e) {
@@ -172,27 +178,25 @@ class EventProvider extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
-
   }
 
   //delete an event
 
   Future<void> deleteEvent(int eventId) async {
-
     try {
       isLoading = true;
       errorMessage = null;
       notifyListeners();
-      
-      final token =  userProvider.activeUser?.rememberToken;   // User token
+
+      final token = userProvider.activeUser?.rememberToken; // User token
       if (token == null) {
         errorMessage = "No hay usuario autenticado.";
         return;
       }
-      
+
       EventResponse response = await _eventService.eventDelete(eventId, token);
-      
-      if(response.success == false){
+
+      if (response.success == false) {
         errorMessage = response.message;
       }
     } catch (e) {
@@ -201,32 +205,52 @@ class EventProvider extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
+  }
 
-  } 
-
-  Future<void> updateEvent(int eventId, int organizerId, String title, 
-                                    String description, int category, DateTime startTime,
-                                    DateTime endTime, String location, int? latitude,
-                                    int? longitude, int? maxAtendees, int? price,
-                                    String imageUrl) async {
-
+  Future<void> updateEvent(
+    int eventId,
+    int organizerId,
+    String title,
+    String description,
+    int category,
+    DateTime startTime,
+    DateTime endTime,
+    String location,
+    int? latitude,
+    int? longitude,
+    int? maxAtendees,
+    int? price,
+    String imageUrl,
+  ) async {
     try {
       isLoading = true;
       errorMessage = null;
       notifyListeners();
-      
-      final token =  userProvider.activeUser?.rememberToken;   // User token
+
+      final token = userProvider.activeUser?.rememberToken; // User token
       if (token == null) {
         errorMessage = "No hay usuario autenticado.";
         return;
       }
-      
-      EventResponse response = await _eventService.eventUpdate(eventId,organizerId,title, 
-        description, category, startTime, endTime, location, latitude, 
-        longitude, maxAtendees, price, imageUrl ,token
+
+      EventResponse response = await _eventService.eventUpdate(
+        eventId,
+        organizerId,
+        title,
+        description,
+        category,
+        startTime,
+        endTime,
+        location,
+        latitude,
+        longitude,
+        maxAtendees,
+        price,
+        imageUrl,
+        token,
       );
-      
-      if(response.success == false){
+
+      if (response.success == false) {
         errorMessage = response.message;
       }
     } catch (e) {
@@ -235,30 +259,77 @@ class EventProvider extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
+  }
 
-  } 
-
-  Future<void> createEvent(int organizerId, String title, 
-                                    String description, int category, DateTime startTime,
-                                    DateTime endTime, String location, int? price,
-                                    String imageUrl) async {
-
+  Future<void> getEventsByOrganizerForStats(int id) async {
     try {
       isLoading = true;
       errorMessage = null;
       notifyListeners();
-      
-      final token =  userProvider.activeUser?.rememberToken;   // User token
+
+      final token = userProvider.activeUser?.rememberToken;
+      if (token == null) return;
+
+      final response = await _eventService.getEventsByOrganizer(id, token);
+      if (response.success) {
+        eventsByOrganizerForStats = response.data
+            .where((e) => e.deleted != 1)
+            .toList();
+      }
+    } catch (e) {
+      errorMessage = '$e';
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  //Refrescar los eventos del organizador
+  Future<void> refreshOrganizerEvents() async {
+    final userId = userProvider.activeUser?.id;
+    if (userId != null) {
+      await getEventsByOrganizer(userId);
+      await getEventsByOrganizerForStats(userId);
+      notifyListeners();
+    }
+  }
+
+  Future<void> createEvent(
+    int organizerId,
+    String title,
+    String description,
+    int category,
+    DateTime startTime,
+    DateTime endTime,
+    String location,
+    int? price,
+    String imageUrl,
+  ) async {
+    try {
+      isLoading = true;
+      errorMessage = null;
+      notifyListeners();
+
+      final token = userProvider.activeUser?.rememberToken; // User token
       if (token == null) {
         errorMessage = "No hay usuario autenticado.";
         return;
       }
-      
-      EventResponse response = await _eventService.eventCreate(organizerId,title, 
-        description, category, startTime, endTime, location, price, imageUrl ,token
+
+      EventResponse response = await _eventService.eventCreate(
+        organizerId,
+        title,
+        description,
+        category,
+        startTime,
+        endTime,
+        location,
+        price,
+        imageUrl,
+        token,
       );
-      
-      if(response.success == false){
+
+      if (response.success == false) {
         errorMessage = response.message;
       }
     } catch (e) {
@@ -267,7 +338,5 @@ class EventProvider extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
-
-  } 
-
+  }
 }

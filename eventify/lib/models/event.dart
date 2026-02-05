@@ -2,10 +2,8 @@
 class Event{
   int id;
   int? organizerId;
-
-  int? categoryId;        // 👈 for backend
-  String category;       // 👈 for UI
-
+  int? categoryId;
+  String category;
   String title;
   String? description;
   DateTime startTime;
@@ -47,11 +45,11 @@ factory Event.fromEventsJson(Map<String, dynamic> json) => Event(
   endTime: DateTime.parse(json['end_time'] ?? DateTime.now().toIso8601String()),
   imageUrl: json['image_url'] ?? '',
   location: json['location'] ?? '',
-  latitude: json['latitude'],
-  longitude: json['longitude'],
-  price: json['price'] ?? 0,
+  latitude: (json['latitude'] as num?)?.toInt() ?? 0,
+  longitude: (json['longitude'] as num?)?.toInt() ?? 0,
+  price: json['price'],
   deleted: json['deleted'] ?? 0,
-  maxAttendees: json['max_attendees'],
+  maxAttendees: json['max_attendees'] ?? 0,
 );
 
 }
