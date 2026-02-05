@@ -161,6 +161,7 @@ class EventProvider extends ChangeNotifier {
       if(response.success == true){
         eventsByOrganizer = response.data;
         eventsByOrganizer.removeWhere((e)=> e.deleted == 1);
+        eventsByOrganizer.removeWhere((e) => e.startTime.isBefore(DateTime.now()));
         eventsByOrganizer.sort((a, b) => a.startTime.compareTo(b.startTime));
       }else{
         errorMessage = response.message;
