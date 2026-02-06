@@ -20,7 +20,7 @@ class EventResponse {
         // Cuando devuelve un solo objeto
         parsedData = [Event.fromEventsJson(json['data'])];
       } else if (json['data'] is List) {
-        // Cuando devuelve una lista (por ejemplo otros endpoints)
+        // Cuando devuelve una lista
         parsedData = (json['data'] as List)
             .map((e) => Event.fromEventsJson(e))
             .toList();

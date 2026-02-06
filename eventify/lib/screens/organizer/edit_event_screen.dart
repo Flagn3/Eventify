@@ -188,8 +188,8 @@ class _EditEventScreenState extends State<EditEventScreen> {
                       await eventProvider.updateEvent(
                         widget.event.id,
                         widget.user.id,
-                        descriptionController.text.trim(),
                         titleController.text.trim(),
+                        descriptionController.text.trim(),
                         selectedCategoryId!,
                         newStart,
                         newEnd,
@@ -200,6 +200,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
                         widget.event.price,
                         imageUrl,
                       );
+                      await eventProvider.refreshOrganizerEvents();
 
                       await eventProvider
                           .getEventsByOrganizer(widget.user.id);

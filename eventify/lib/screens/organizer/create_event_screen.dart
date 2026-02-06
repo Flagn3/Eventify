@@ -192,6 +192,7 @@ class _CreateEventScreemState extends State<CreateEventScreen> {
                           descriptionController.text.trim(), selectedCategoryId!, 
                           start, end, locationController.text.trim(), price, imageUrl!
                         );
+                        await eventProvider.refreshOrganizerEvents();
                         await eventProvider
                             .getEventsByOrganizer(widget.user.id);
 
